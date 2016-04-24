@@ -6,3 +6,56 @@ output: html_document
 ```{r}
 print("Christophe")
 ```
+
+
+## Twitter search
+
+Need to run only this chunk (`Twitter Setup`) first because you need to put in a PIN given by Twitter.  
+
+```{r, Twitter Setup}
+library(twitteR)
+library(httr)
+
+consumer_key <- "wztCejPmRPdpQWAjDQY1sJwjz"
+consumer_secret <- "8qQatDL55aie8mS6hpCy4Rth9pC6PguK2wWAiy4POwJ84OEQqe"
+access_token <- "4228029732-Ax9gP4SArwAIxnJK0pIFVsBmHhIBFTcHbn0dsvJ"
+access_secret <- "1lp8uHBeK0VTuog9wOfbtIBxXWrnKoqin6sTCUg9ogJNu"
+
+download.file(url='http://curl.haxx.se/ca/cacert.pem', destfile='cacert.pem')
+reqURL <- 'https://api.twitter.com/oauth/request_token'
+accessURL <- 'https://api.twitter.com/oauth/access_token'
+authURL <- 'https://api.twitter.com/oauth/authorize'
+Cred <- OAuthFactory$new(consumerKey=consumer_key,
+                         consumerSecret=consumer_secret,
+                         requestURL=reqURL,
+                         accessURL=accessURL,
+                         authURL=authURL)
+
+Cred$handshake(cainfo = system.file('CurlSSL', 
+                                    'cacert.pem', 
+                                    package = 'RCurl'))
+```
+
+Now run the following chunks after entering the PIN for Twitter Authorization.
+
+```{r}
+save(Cred, file='twitter authentication.Rdata')
+load('twitter authentication.Rdata') 
+setup_twitter_oauth(consumer_key, 
+                    consumer_secret, 
+                    access_token, 
+                    access_secret)
+```
+
+This chunk gets the twitter search results for a term, `searchTwitter` has some other settings that could probably improve results.
+
+```{r, Searching Twitter}
+search_term <- function(term){
+  search_term <- gsub(" ", "+", term)
+  return(search_term)
+}
+  
+SearchTerm <- search_term("BarberShop: The Next Cut")
+list <- searchTwitter(SearchTerm, n = 100)
+df <- twListToDF(list)
+```
