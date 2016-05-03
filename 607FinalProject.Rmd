@@ -1,13 +1,44 @@
 ---
-title: "Data 607 Final Project"
-output: html_document
+title: "Data 607 Final Project: Movie Review Sentiment Analysis"
+author: Valerie Briot, Christophe Hunt, Armenoush Aslanian-Persico
+date: May 2016
+output: 
+  html_document:
+    toc: true
+    toc_depth: 1
+    toc_float: true
+    code_folding: hide
 ---
 
-## Twitter search
+# Introduction and Motivation
 
-Need to run only this chunk (`Twitter Setup`) first because you need to put in a PIN given by Twitter.  
+We set out to compare 2016 New York Times movie reviews and tweets related to a given set of movies. 
 
-```{r, Twitter Setup}
+We envisioned a sentiment analysis comparison of the two data sources. How favorably did the New York Times review a given movie compared to the average sentiment on Twitter?
+
+What could this information show us? How could the resulting analysis be helpful to moviegoers and the movie industry?
+
+# Data Science Workflow
+
+We began with an API pull of a list of recent New York Times movie reviews. 
+
+We then performed an API pull of recent tweets. We learned that Twitter provides only a limited search history for publicly available tweets. This resulted in an adjustment of our project scope. 
+
+We then adjusted the date range of our New York Times movie list to contain only the movies with available Twitter data. 
+
+We ran a sentiment analysis on the text of the tweets and the text of the movie reviews for the given set of movies.
+
+We created data frames for our data sources, cleaned and trasformed the data, and performed analysis on the resulting datasets.
+
+# Sources
+
+## Part 1. Initiate Twitter Search
+
+We registered for a Twitter API key to perform the search of public tweets related to movies. 
+
+This code chunk (`Twitter Setup`) was run first as it requires a PIN given by Twitter.  
+
+```{r, Twitter Setup, eval=FALSE}
 library(twitteR)
 library(httr)
 library(ROAuth)
@@ -32,9 +63,9 @@ Cred$handshake(cainfo = system.file('CurlSSL',
                                     package = 'RCurl'))
 ```
 
-Now run the following chunks after entering the PIN for Twitter Authorization.
+We then ran the following chunks after entering the PIN for Twitter Authorization.
 
-```{r}
+```{r, eval=FALSE}
 save(Cred, file='twitter authentication.Rdata')
 load('twitter authentication.Rdata') 
 setup_twitter_oauth(consumer_key, 
@@ -43,7 +74,13 @@ setup_twitter_oauth(consumer_key,
                     access_secret)
 ```
 
-This chunk gets the twitter search results for a term, `searchTwitter` has some other settings that could probably improve results.
+
+## Part 2. Retrieve API of New York Times Movie Reviews
+
+We registered for a New York Times Movie API key to pull the movie review data.
+
+We used the opening date range 2016-04-21 through 2016-05-06.
+
 
 ```{r, eval=FALSE}
 #required libraries
@@ -51,7 +88,7 @@ library(jsonlite)
 library(knitr)
 
 #RESULTS 0-20 AS OF 2016-05-01
-NYTREVIEWS_JSON_URL1 = 'http://api.nytimes.com/svc/movies/v2/reviews/search.json?openingmurl1-date=2016-04-21;2016-05-018&api-key=YOURAPIKEYHERE'#url for api results 0-20
+NYTREVIEWS_JSON_URL1 = 'http://api.nytimes.com/svc/movies/v2/reviews/search.json?opening-date=2016-04-21;2016-05-018&api-key=YOURAPIKEYHERE'#url for api results 0-20
 json_file1 <- fromJSON(NYTREVIEWS_JSON_URL1)# get json
 df1 <- as.data.frame(json_file1$results) #dataframe for results
 #str(df1) #view structure 
@@ -83,7 +120,7 @@ kable(combo, row.names = TRUE) #display with row numbers
 ```
 
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, eval=FALSE}
 
 library(jsonlite)
 library(knitr)
@@ -127,17 +164,33 @@ combo<-combo[,c(1,5,4,6,2,3)]
 kable(combo, row.names = TRUE)
 ```
 
-```{r, include= FALSE}
+```{r, include= FALSE, eval=FALSE}
 url <- "https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/"
 ```
 
-```{r}
+```{r, eval= FALSE}
 data.url <- file(paste(url,"locations.csv", sep = ""), open="r" )
 locations <- read.csv(data.url, sep=",", header=TRUE, stringsAsFactors = FALSE)
 ```
 
+> **The resulting dataset was as follows: [ image of dataset head ]**
 
-```{r, Searching Twitter}
+
+## Part 3. Peform Twitter Search and Twitter Sentiment Analysis
+
+Once we established the list of available New York Times movie reviews, we ran the Twitter search using the movie title as a search term. To get better Twitter search results for one-word movies, we added the word "movie" to our search term.
+
+This chunk retrieved the Twitter search results for a term. `searchTwitter` has some other settings that could probably improve results.
+
+We used the indico package to perform sentiment analysis, resulting in a score of 0-100 for each tweet, 100 being positive.
+
+We decided to use unique tweets only, therefore eliminating any retweet data.
+
+For the benefit of our analysis, we filtered the Twitter search results to pull only the tweets which were coded with geographical location.
+
+We chose the following cities at random: ///// 
+
+```{r, Searching Twitter, eval= FALSE}
 library(indicoio)
 
 rm_special <-function(x) iconv(x, "UTF-8", "UTF-8",sub='')
@@ -175,3 +228,32 @@ write.csv(df, file = paste("Tweets for ", as.character(format(Sys.Date() ,format
 
 ```
 
+> **The resulting dataset was as follows: [ image of dataset head ]**
+
+## Part 4. Perform NYT Review Sentiment Analysis
+
+For each New York Times review in the list, we pulled the text of the body of the review and ran it through sentiment analysis with indico, again resulting in a 0-100 score.
+
+> **The resulting dataset was as follows: [ image of dataset head ]**
+
+# Data Transformation
+
+We combined the Twitter sentiment and New York Times sentiment dataframes to view results.
+
+# Statistical Analysis and Graphics
+
+# New Features and Challenges
+
+Twitter API / OAUTH
+
+Choosing tweets
+
+Testing different sentiment analysis machines
+
+Indico package
+
+Collaborating on Slack
+
+Collaborating on Github 
+
+# Insights and Conclusion
