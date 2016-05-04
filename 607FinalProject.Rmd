@@ -122,7 +122,7 @@ kable(combo, row.names = TRUE) #display with row numbers
 ```
 
 
-```{r, echo=FALSE, eval=TRUE}
+```{r, echo=FALSE, eval=FALSE}
 # This code chunk contains the actual API key and needs to be set to eval=TRUE to generate the CSV.
 
 library(jsonlite)
@@ -178,8 +178,8 @@ data.url <- file(paste(url,"locations.csv", sep = ""), open="r" )
 locations <- read.csv(data.url, sep=",", header=TRUE, stringsAsFactors = FALSE)
 ```
 
-> **The resulting CSV is available here:
-
+> The resulting CSV is available here:
+https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/20160501nytreviews.csv
 
 
 ## Part 3. Peform Twitter Search and Twitter Sentiment Analysis
@@ -240,7 +240,8 @@ write.csv(df, file = paste("Tweets for ", as.character(format(Sys.Date() ,format
 
 For each New York Times review in the list, we pulled the text of the body of the review and ran it through sentiment analysis with indico, again resulting in a 0-100 score.
 
-> **The resulting dataset was as follows: [ image of dataset head ]**
+> The resulting CSV is available here:
+[link to NYT review sentiment analysis]
 
 # Data Transformation
 

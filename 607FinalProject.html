@@ -285,7 +285,9 @@ setup_twitter_oauth(consumer_key,
 <h2>Part 2. Retrieve API of New York Times Movie Reviews</h2>
 <p>We registered for a New York Times Movie API key to pull the movie review data.</p>
 <p>We used the opening date range 2016-04-21 through 2016-05-06.</p>
-<pre class="r"><code>#required libraries
+<pre class="r"><code>#This code chunk is for display only and does not contain the actual API key.
+
+#required libraries
 library(jsonlite)
 library(knitr)
 
@@ -319,241 +321,10 @@ combo&lt;-cbind(df,urls) #combine reviews and links
 combo&lt;-combo[,c(1:3,7,8,10)] #subset needed columns
 combo&lt;-combo[,c(1,5,4,6,2,3)] #reorder needed columns
 kable(combo, row.names = TRUE) #display with row numbers</code></pre>
-<table>
-<thead>
-<tr class="header">
-<th align="left"></th>
-<th align="left">display_title</th>
-<th align="left">opening_date</th>
-<th align="left">publication_date</th>
-<th align="left">url</th>
-<th align="left">mpaa_rating</th>
-<th align="right">critics_pick</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">1</td>
-<td align="left">A Bigger Splash</td>
-<td align="left">2016-05-04</td>
-<td align="left">2016-05-03</td>
-<td align="left"><a href="http://www.nytimes.com/2016/05/04/movies/a-bigger-splash-review-tilda-swinton.html" class="uri">http://www.nytimes.com/2016/05/04/movies/a-bigger-splash-review-tilda-swinton.html</a></td>
-<td align="left">R</td>
-<td align="right">1</td>
-</tr>
-<tr class="even">
-<td align="left">2</td>
-<td align="left">Sin Alas</td>
-<td align="left">NA</td>
-<td align="left">2016-05-03</td>
-<td align="left"><a href="http://www.nytimes.com/2016/05/04/movies/sin-alas-review.html" class="uri">http://www.nytimes.com/2016/05/04/movies/sin-alas-review.html</a></td>
-<td align="left"></td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">3</td>
-<td align="left">Baaghi</td>
-<td align="left">2016-04-29</td>
-<td align="left">2016-05-01</td>
-<td align="left"><a href="http://www.nytimes.com/2016/05/02/movies/baaghi-review.html" class="uri">http://www.nytimes.com/2016/05/02/movies/baaghi-review.html</a></td>
-<td align="left"></td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">4</td>
-<td align="left">Keanu</td>
-<td align="left">2016-04-29</td>
-<td align="left">2016-04-28</td>
-<td align="left"><a href="http://www.nytimes.com/2016/04/29/movies/keanu-review-key-and-peele.html" class="uri">http://www.nytimes.com/2016/04/29/movies/keanu-review-key-and-peele.html</a></td>
-<td align="left">R</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">5</td>
-<td align="left">The American Side</td>
-<td align="left">NA</td>
-<td align="left">2016-04-28</td>
-<td align="left"><a href="http://www.nytimes.com/2016/04/29/movies/the-american-side-review.html" class="uri">http://www.nytimes.com/2016/04/29/movies/the-american-side-review.html</a></td>
-<td align="left"></td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">6</td>
-<td align="left">Bourek</td>
-<td align="left">2016-04-29</td>
-<td align="left">2016-04-28</td>
-<td align="left"><a href="http://www.nytimes.com/2016/04/29/movies/bourek-review.html" class="uri">http://www.nytimes.com/2016/04/29/movies/bourek-review.html</a></td>
-<td align="left"></td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">7</td>
-<td align="left">Pali Road</td>
-<td align="left">2016-04-29</td>
-<td align="left">2016-04-28</td>
-<td align="left"><a href="http://www.nytimes.com/2016/04/29/movies/pali-road-review.html" class="uri">http://www.nytimes.com/2016/04/29/movies/pali-road-review.html</a></td>
-<td align="left"></td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">8</td>
-<td align="left">Papa: Hemingway in Cuba</td>
-<td align="left">2016-04-29</td>
-<td align="left">2016-04-28</td>
-<td align="left"><a href="http://www.nytimes.com/2016/04/29/movies/papa-hemingway-in-cuba-review.html" class="uri">http://www.nytimes.com/2016/04/29/movies/papa-hemingway-in-cuba-review.html</a></td>
-<td align="left">R</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">9</td>
-<td align="left">Dough</td>
-<td align="left">2016-04-29</td>
-<td align="left">2016-04-28</td>
-<td align="left"><a href="http://www.nytimes.com/2016/04/29/movies/dough-review.html" class="uri">http://www.nytimes.com/2016/04/29/movies/dough-review.html</a></td>
-<td align="left"></td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">10</td>
-<td align="left">The Family Fang</td>
-<td align="left">2016-05-06</td>
-<td align="left">2016-04-28</td>
-<td align="left"><a href="http://www.nytimes.com/2016/04/29/movies/the-family-fang-review-jason-bateman-nicole-kidman.html" class="uri">http://www.nytimes.com/2016/04/29/movies/the-family-fang-review-jason-bateman-nicole-kidman.html</a></td>
-<td align="left">R</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">11</td>
-<td align="left">The Man Who Knew Infinity</td>
-<td align="left">2016-04-29</td>
-<td align="left">2016-04-28</td>
-<td align="left"><a href="http://www.nytimes.com/2016/04/29/movies/the-man-who-knew-infinity-review.html" class="uri">http://www.nytimes.com/2016/04/29/movies/the-man-who-knew-infinity-review.html</a></td>
-<td align="left">PG-13</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">12</td>
-<td align="left">Viva</td>
-<td align="left">2016-04-29</td>
-<td align="left">2016-04-28</td>
-<td align="left"><a href="http://www.nytimes.com/2016/04/29/movies/viva-review.html" class="uri">http://www.nytimes.com/2016/04/29/movies/viva-review.html</a></td>
-<td align="left">R</td>
-<td align="right">1</td>
-</tr>
-<tr class="odd">
-<td align="left">13</td>
-<td align="left">Mother’s Day</td>
-<td align="left">2016-04-29</td>
-<td align="left">2016-04-28</td>
-<td align="left"><a href="http://www.nytimes.com/2016/04/29/movies/mothers-day-review.html" class="uri">http://www.nytimes.com/2016/04/29/movies/mothers-day-review.html</a></td>
-<td align="left">PG-13</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">14</td>
-<td align="left">L’Attesa (The Wait)</td>
-<td align="left">NA</td>
-<td align="left">2016-04-28</td>
-<td align="left"><a href="http://www.nytimes.com/2016/04/29/movies/lattesa-the-wait-review.html" class="uri">http://www.nytimes.com/2016/04/29/movies/lattesa-the-wait-review.html</a></td>
-<td align="left"></td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">15</td>
-<td align="left">Older Than Ireland</td>
-<td align="left">2016-04-29</td>
-<td align="left">2016-04-28</td>
-<td align="left"><a href="http://www.nytimes.com/2016/04/29/movies/older-than-ireland-review.html" class="uri">http://www.nytimes.com/2016/04/29/movies/older-than-ireland-review.html</a></td>
-<td align="left"></td>
-<td align="right">1</td>
-</tr>
-<tr class="even">
-<td align="left">16</td>
-<td align="left">A Beautiful Planet</td>
-<td align="left">2016-04-29</td>
-<td align="left">2016-04-28</td>
-<td align="left"><a href="http://www.nytimes.com/2016/04/29/movies/a-beautiful-planet-review.html" class="uri">http://www.nytimes.com/2016/04/29/movies/a-beautiful-planet-review.html</a></td>
-<td align="left">G</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">17</td>
-<td align="left">Ratchet &amp; Clank</td>
-<td align="left">2016-04-29</td>
-<td align="left">2016-04-28</td>
-<td align="left"><a href="http://www.nytimes.com/2016/04/29/movies/ratchet-clank-review.html" class="uri">http://www.nytimes.com/2016/04/29/movies/ratchet-clank-review.html</a></td>
-<td align="left">PG</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">18</td>
-<td align="left">Fassbinder: To Love Without Demands</td>
-<td align="left">2016-04-29</td>
-<td align="left">2016-04-28</td>
-<td align="left"><a href="http://www.nytimes.com/2016/04/29/movies/fassbinder-to-love-without-demands-review.html" class="uri">http://www.nytimes.com/2016/04/29/movies/fassbinder-to-love-without-demands-review.html</a></td>
-<td align="left"></td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">19</td>
-<td align="left">Viktoria</td>
-<td align="left">NA</td>
-<td align="left">2016-04-28</td>
-<td align="left"><a href="http://www.nytimes.com/2016/04/29/movies/viktoria-review.html" class="uri">http://www.nytimes.com/2016/04/29/movies/viktoria-review.html</a></td>
-<td align="left"></td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">20</td>
-<td align="left">Transfixed</td>
-<td align="left">NA</td>
-<td align="left">2016-04-28</td>
-<td align="left"><a href="http://www.nytimes.com/2016/04/29/movies/transfixed-review.html" class="uri">http://www.nytimes.com/2016/04/29/movies/transfixed-review.html</a></td>
-<td align="left"></td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">21</td>
-<td align="left">Men &amp; Chicken</td>
-<td align="left">2016-04-22</td>
-<td align="left">2016-04-21</td>
-<td align="left"><a href="http://www.nytimes.com/2016/04/22/movies/men-and-chicken-review.html" class="uri">http://www.nytimes.com/2016/04/22/movies/men-and-chicken-review.html</a></td>
-<td align="left"></td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">22</td>
-<td align="left">Hockney</td>
-<td align="left">2016-04-22</td>
-<td align="left">2016-04-21</td>
-<td align="left"><a href="http://www.nytimes.com/2016/04/22/movies/hockney-review.html" class="uri">http://www.nytimes.com/2016/04/22/movies/hockney-review.html</a></td>
-<td align="left"></td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">23</td>
-<td align="left">The Meddler</td>
-<td align="left">2016-04-22</td>
-<td align="left">2016-04-21</td>
-<td align="left"><a href="http://www.nytimes.com/2016/04/22/movies/the-meddler-review-susan-sarandon-rose-byrne.html" class="uri">http://www.nytimes.com/2016/04/22/movies/the-meddler-review-susan-sarandon-rose-byrne.html</a></td>
-<td align="left">PG-13</td>
-<td align="right">1</td>
-</tr>
-<tr class="even">
-<td align="left">24</td>
-<td align="left">Green Room</td>
-<td align="left">2016-04-29</td>
-<td align="left">2016-04-14</td>
-<td align="left"><a href="http://www.nytimes.com/2016/04/15/movies/green-room-review.html" class="uri">http://www.nytimes.com/2016/04/15/movies/green-room-review.html</a></td>
-<td align="left">R</td>
-<td align="right">0</td>
-</tr>
-</tbody>
-</table>
 <pre class="r"><code>data.url &lt;- file(paste(url,&quot;locations.csv&quot;, sep = &quot;&quot;), open=&quot;r&quot; )
 locations &lt;- read.csv(data.url, sep=&quot;,&quot;, header=TRUE, stringsAsFactors = FALSE)</code></pre>
 <blockquote>
-<p><strong>The resulting dataset was as follows: [ image of dataset head ]</strong></p>
+<p>The resulting CSV is available here: <a href="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/20160501nytreviews.csv" class="uri">https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/20160501nytreviews.csv</a></p>
 </blockquote>
 </div>
 <div id="part-3.-peform-twitter-search-and-twitter-sentiment-analysis" class="section level2">
@@ -598,14 +369,14 @@ df$Sentiment_Score &lt;- unlist(sentiment(as.character(rm_special(df$tweet)),
                                        api_key = '114ffc17022fd58af3da5cfd5f3e4388'))
 write.csv(df, file = paste(&quot;Tweets for &quot;, as.character(format(Sys.Date() ,format=&quot;%m.%d.%Y&quot;)), &quot;.csv&quot;, sep = &quot;&quot;))</code></pre>
 <blockquote>
-<p><strong>The resulting dataset was as follows: [ image of dataset head ]</strong></p>
+<p>The resulting CSV is available here: <a href="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.03.2016.csv">https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.03.2016.csv</a></p>
 </blockquote>
 </div>
 <div id="part-4.-perform-nyt-review-sentiment-analysis" class="section level2">
 <h2>Part 4. Perform NYT Review Sentiment Analysis</h2>
 <p>For each New York Times review in the list, we pulled the text of the body of the review and ran it through sentiment analysis with indico, again resulting in a 0-100 score.</p>
 <blockquote>
-<p><strong>The resulting dataset was as follows: [ image of dataset head ]</strong></p>
+<p>The resulting CSV is available here: [link to NYT review sentiment analysis]</p>
 </blockquote>
 </div>
 </div>
