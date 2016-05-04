@@ -169,6 +169,41 @@ kable(combo, row.names = TRUE)
 write.table(combo, "20160501nytreviews.csv") 
 ```
 
+## Part 3 Retrieve NY Times review text for each entry and perform sentiment analysis
+
+For each URL pointing to an actual movie review, we will now scrap the text of the review.  Only the actually text of the review will be consiered.  This is indicated by the class = 'story-body-text story-content' under the paragraph tag <p>.  
+
+```{r, eval = FALSE}
+# For each URl in combo
+
+library(RCurl)
+library(XML)
+library(indicoio)
+
+#Set RCurl pars
+curl <- getCurlHandle()
+agent <- c(R.version$version.string, ",", R.version$platform)
+
+movie_score <- data.frame()
+
+for i in 1:length(combo$url){
+  movie_url <-  combo$url[i] 
+  # Get Review corresponding the url
+  my_movie <- getURL(movie_url, curl = curl, verbose = TRUE)
+  
+  content_review = htmlTreeParse(my_movie, asText=TRUE, useInternalNodes = TRUE, encoding = 'UTF-8')
+  
+  plain.text <- xpathSApply(xmlRoot(content_review), "//p[@class = 'story-body-text story-content']", xmlValue)
+  plain.text <- cat(paste(plain.text, collapse = "\n"))
+  
+  movie_score[i, 1] <- unlist(sentiment(as.character(rm_special(plaint.text)), 
+                                         api_key = 'indicoio_API_Key'))
+}
+combo <- cbind(combo, movie_score)
+```
+
+
+
 ```{r, include= FALSE, eval=FALSE}
 url <- "https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/"
 ```
