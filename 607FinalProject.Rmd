@@ -229,7 +229,7 @@ We decided to use unique tweets only, therefore eliminating any retweet data.
 
 For the benefit of our analysis, we filtered the Twitter search results to pull only the tweets which were coded with geographical location.
 
-We chose the following cities at random: ///// 
+We chose the following cities at random: `r paste(locations$City, collapse = ", ")`
 
 ```{r, Searching Twitter, eval= FALSE}
 library(indicoio)
@@ -243,11 +243,15 @@ search_term <- function(term){
                   return(search_term)
                 }
 
+
+
 df <- NULL
 for (i in combo$display_title){
   SearchTerm <- search_term(i)
   for (j in seq(1:length(locations$City))){
-      list <- suppressWarnings(searchTwitter(SearchTerm,  n = 5000, 
+      list <- suppressWarnings(searchTwitter(SearchTerm,  
+                                             since = format(Sys.Date()-1,format="%Y-%m-%d"), 
+                                             until = format(Sys.Date(),format="%Y-%m-%d"), n = 5000, 
                                     geocode = paste(locations$Lat[j], ",", locations$Long[j], ",30mi", sep = "" )))
           if (length(list) == 0){ 
             NULL
@@ -260,12 +264,13 @@ for (i in combo$display_title){
           tweetdf$day <- format(Sys.Date() ,format="%m.%d.%Y")
           df <- rbind(df,tweetdf)
           }
-  } 
-}
+         } 
+       }
+
 df$Sentiment_Score <- unlist(sentiment(as.character(rm_special(df$tweet)), 
                                        api_key = '114ffc17022fd58af3da5cfd5f3e4388'))
-write.csv(df, file = paste("Tweets for ", as.character(format(Sys.Date() ,format="%m.%d.%Y")), ".csv", sep = ""))
 
+write.csv(df, file = paste("Tweets for ", as.character(format(Sys.Date() ,format="%m.%d.%Y")), ".csv", sep = ""))
 
 ```
 
