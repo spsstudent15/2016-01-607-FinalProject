@@ -1,0 +1,87 @@
+---
+title: "Test run for tweet summary 20160506"
+author: "Armenoush Aslanian-Persico"
+output: html_document
+---
+
+
+```{r, eval=FALSE}
+library('knitr')
+library('markdown')
+library('tidyr')
+library('RCurl')
+library('plyr')
+library('dplyr')
+library('ggplot2')
+```
+
+```{r, eval=TRUE, include=FALSE}
+library('knitr')
+library('markdown')
+library('tidyr')
+library('RCurl')
+library('plyr')
+library('dplyr')
+library('ggplot2')
+```
+
+
+# Test run with one day of tweets only
+
+## Import CSV
+```{r}
+
+x <- getURL("https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.06.2016.csv") #import twitter CSV
+
+tweets506<- data.frame(read.csv(text=x, header=T)) #create data frame
+
+head(tweets506) #show head
+```
+
+# Average score by movie
+
+```{r}
+moviesum<- ddply(tweets506, .(movie), summarize,  Sentiment_Score=mean(Sentiment_Score)) #summarize by movie
+      
+moviesum
+```
+# Average score by movie and city
+
+```{r}
+moviecitysum<- ddply(tweets506, .(movie, city), summarize,  Sentiment_Score=mean(Sentiment_Score)) #summarize by movie and city
+      
+moviecitysum
+```
+
+# Average score by city
+
+```{r}
+citysum<- ddply(tweets506, .(city), summarize,  Sentiment_Score=mean(Sentiment_Score)) #summarize by city
+      
+citysum
+```
+
+# [Verification Step] Show List of Unique Movies
+```{r}
+allmovies<-unique(tweets506[c("movie")]) # get unique movies
+allmovies$num<-seq.int(nrow(allmovies)) # add counter row
+allmovies #show unique values for movie name
+```
+# Graphs by Average Movie Sentiment and Average City Sentiment
+```{r}
+ggplot(
+  moviesum, aes(x = reorder(movie,Sentiment_Score), y = Sentiment_Score, fill=Sentiment_Score)) + 
+  geom_bar(stat="identity") +
+  ggtitle("Movie Average Sentiment Score")+ 
+  theme(axis.text=element_text(angle=90))+
+  labs(x="Movies",y="Score")
+
+ggplot(
+  citysum, aes(x = reorder(city,Sentiment_Score), y = Sentiment_Score, fill=Sentiment_Score)) + 
+  geom_bar(stat="identity") +
+  ggtitle("City Average Sentiment Score")+ 
+  theme(axis.text=element_text(angle=90))+
+  labs(x="City",y="Score")
+
+```
+  
