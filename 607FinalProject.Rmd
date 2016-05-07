@@ -7,7 +7,7 @@ output:
     toc: true
     toc_depth: 1
     toc_float: true
-    code_folding: hide
+    code_folding: show
 ---
 
 # Introduction and Motivation
@@ -32,7 +32,7 @@ We created data frames for our data sources, cleaned and trasformed the data, an
 
 # Sources
 
-## Part 1. Initiate Twitter Search
+## Part 1. Initiate Twitter Search.
 
 We registered for a Twitter API key to perform the search of public tweets related to movies. 
 
@@ -75,30 +75,31 @@ setup_twitter_oauth(consumer_key,
 ```
 
 
-## Part 2. Retrieve API of New York Times Movie Reviews
+## Part 2. Retrieve API of New York Times Movie Reviews.
 
 We registered for a New York Times Movie API key to pull the movie review data.
 
-We used the opening date range 2016-04-21 through 2016-05-06.
+We used the opening date range 2016-04-21 through 2016-05-07.
 
+```{r, eval=TRUE, include=FALSE}
+YOURAPIKEYHERE<- "ef056a1d0cdde8b2f03c95bc7dd57722:19:29126896"
+```
 
-```{r, eval=FALSE}
-#This code chunk is for display only and does not contain the actual API key.
-
+```{r, eval=TRUE}
 #required libraries
-library(jsonlite)
-library(knitr)
+suppressWarnings(library(jsonlite))
+suppressWarnings(library(knitr))
 
-#RESULTS 0-20 AS OF 2016-05-01
-NYTREVIEWS_JSON_URL1 = 'http://api.nytimes.com/svc/movies/v2/reviews/search.json?opening-date=2016-04-21;2016-05-018&api-key=YOURAPIKEYHERE'#url for api results 0-20
+#RESULTS 0-20 AS OF 2016-05-07
+NYTREVIEWS_JSON_URL1 = 'http://api.nytimes.com/svc/movies/v2/reviews/search.json?opening-date=2016-04-21;2016-05-07&api-key=YOURAPIKEYHERE'#url for api results 0-20
 json_file1 <- fromJSON(NYTREVIEWS_JSON_URL1)# get json
 df1 <- as.data.frame(json_file1$results) #dataframe for results
 #str(df1) #view structure 
 #colnames(df1) #view column names
 df1s<-df1[,c(1:8)] #subset needed columns
 
-#RESULTS 21-40 AS OF 2016-05-01
-NYTREVIEWS_JSON_URL2 = 'http://api.nytimes.com/svc/movies/v2/reviews/search.json?opening-date=2016-04-21;2016-05-01&api-key=YOURAPIKEYHERE&offset=20' #url for api results 20-40
+#RESULTS 21-40 AS OF 2016-05-07
+NYTREVIEWS_JSON_URL2 = 'http://api.nytimes.com/svc/movies/v2/reviews/search.json?opening-date=2016-04-21;2016-05-07&api-key=YOURAPIKEYHERE&offset=20' #url for api results 20-40
 json_file2 <- fromJSON(NYTREVIEWS_JSON_URL2) #get json
 df2 <- as.data.frame(json_file2$results) #dataframe for results
 df2s<-df2[,c(1:8)] #subset needed columns
@@ -119,59 +120,21 @@ combo<-cbind(df,urls) #combine reviews and links
 combo<-combo[,c(1:3,7,8,10)] #subset needed columns
 combo<-combo[,c(1,5,4,6,2,3)] #reorder needed columns
 kable(combo, row.names = TRUE) #display with row numbers
+
+write.table(combo, "20160508nytreviews.csv") 
+
 ```
 
-
-```{r, echo=FALSE, eval=FALSE}
-# This code chunk contains the actual API key and needs to be set to eval=TRUE to generate the CSV.
-
-library(jsonlite)
-library(knitr)
-
-#RESULTS 0-20 AS OF 2016-05-01
-
-NYTREVIEWS_JSON_URL1 = 'http://api.nytimes.com/svc/movies/v2/reviews/search.json?openingmurl1-date=2016-04-21;2016-05-018&api-key=ef056a1d0cdde8b2f03c95bc7dd57722:19:29126896'
-json_file1 <- fromJSON(NYTREVIEWS_JSON_URL1)
-df1 <- as.data.frame(json_file1$results)
-#str(df1)
-#colnames(df1)
-df1s<-df1[,c(1:8)]
+> The resulting CSV is available here:
+https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/20160508nytreviews.csv
 
 
-#RESULTS 21-40 AS OF 2016-05-01
+## Part 3. Retrieve New York Times review text for each entry and perform sentiment analysis.
 
-NYTREVIEWS_JSON_URL2 = 'http://api.nytimes.com/svc/movies/v2/reviews/search.json?opening-date=2016-04-21;2016-05-01&api-key=ef056a1d0cdde8b2f03c95bc7dd57722:19:29126896&offset=20'
-json_file2 <- fromJSON(NYTREVIEWS_JSON_URL2)
-df2 <- as.data.frame(json_file2$results)
-df2s<-df2[,c(1:8)]
+For each URL pointing to an actual movie review, we then scraped the text of the review. Only the actual text of the review was considered. This was indicated by the class = 'story-body-text story-content' under the paragraph tag "< p >".  
 
+We then ran the review text through sentiment analysis with indico, again resulting in a 0-100 score.
 
-df<- rbind(df1s,df2s)
-#knitr::kable(df, row.names =TRUE)
-
-
-
-url1 <- json_file1$results$link
-url1<-url1[,c(1:2)]
-
-url2 <- json_file2$results$link
-url2<-url2[,c(1:2)]
-
-#str(url1)
-urls<- rbind(url1,url2)
-#knitr::kable(urls, row.names = TRUE)
-
-combo<-cbind(df,urls)
-combo<-combo[,c(1:3,7,8,10)]
-combo<-combo[,c(1,5,4,6,2,3)]
-kable(combo, row.names = TRUE)
-
-write.table(combo, "20160501nytreviews.csv") 
-```
-
-## Part 3 Retrieve NY Times review text for each entry and perform sentiment analysis
-
-For each URL pointing to an actual movie review, we will now scrap the text of the review.  Only the actually text of the review will be consiered.  This is indicated by the class = 'story-body-text story-content' under the paragraph tag <p>.  
 
 ```{r, eval = FALSE}
 # For each URl in combo
@@ -203,7 +166,6 @@ combo <- cbind(combo, movie_score)
 ```
 
 
-
 ```{r, include= FALSE, eval=FALSE}
 url <- "https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/"
 ```
@@ -214,10 +176,10 @@ locations <- read.csv(data.url, sep=",", header=TRUE, stringsAsFactors = FALSE)
 ```
 
 > The resulting CSV is available here:
-https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/20160501nytreviews.csv
+/////
 
 
-## Part 3. Peform Twitter Search and Twitter Sentiment Analysis
+## Part 4. Peform Twitter Search and Twitter Sentiment Analysis
 
 Once we established the list of available New York Times movie reviews, we ran the Twitter search using the movie title as a search term. To get better Twitter search results for one-word movies, we added the word "movie" to our search term.
 
@@ -229,7 +191,10 @@ We decided to use unique tweets only, therefore eliminating any retweet data.
 
 For the benefit of our analysis, we filtered the Twitter search results to pull only the tweets which were coded with geographical location.
 
-We chose the following cities at random: `r paste(locations$City, collapse = ", ")`
+We chose the following cities at random: 
+```{r, eval=FALSE}
+paste(locations$City, collapse = ", ")
+```
 
 ```{r, Searching Twitter, eval= FALSE}
 library(indicoio)
@@ -276,12 +241,7 @@ write.csv(df, file = paste("Tweets for ", as.character(format(Sys.Date() ,format
 
 > The resulting CSV is available here: https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.03.2016.csv
 
-## Part 4. Perform NYT Review Sentiment Analysis
 
-For each New York Times review in the list, we pulled the text of the body of the review and ran it through sentiment analysis with indico, again resulting in a 0-100 score.
-
-> The resulting CSV is available here:
-[link to NYT review sentiment analysis]
 
 # Data Transformation
 
