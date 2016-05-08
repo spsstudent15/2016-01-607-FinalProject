@@ -32,7 +32,7 @@ We began with an API pull of a list of recent New York Times movie reviews.
 
 We then performed an API pull of recent tweets. We learned that Twitter provides only a limited search history for publicly available tweets. This resulted in an adjustment of our project scope. 
 
-We then adjusted the date range of our New York Times movie list to contain only the movies with available Twitter data. 
+We then adjusted the date range of our New York Times movie list to contain only the movies with available Twitter data.
 
 We ran a sentiment analysis on the text of the tweets and the text of the movie reviews for the given set of movies.
 
@@ -51,10 +51,10 @@ library(twitteR)
 library(httr)
 library(ROAuth)
 
-consumer_key <- "needs_keys_from_slack"
-consumer_secret <- "needs_keys_from_slack"
-access_token <- "needs_keys_from_slack"
-access_secret <- "needs_keys_from_slack"
+consumer_key <- "consumer_key"
+consumer_secret <- "consumer_secret"
+access_token <- "access_token"
+access_secret <- "access_secret"
 
 download.file(url='http://curl.haxx.se/ca/cacert.pem', destfile='cacert.pem')
 reqURL <- 'https://api.twitter.com/oauth/request_token'
@@ -99,8 +99,8 @@ suppressWarnings(library(jsonlite))
 suppressWarnings(library(knitr))
 
 #RESULTS 0-20 AS OF 2016-05-07
-NYTREVIEWS_JSON_URL1 = 'http://api.nytimes.com/svc/movies/v2/reviews/search.json?opening-date=2016-04-21;2016-05-07&api-key=YOURAPIKEYHERE&order=by-title'#url for api results 0-20
-json_file1 <- fromJSON(NYTREVIEWS_JSON_URL1)# get json
+NYTREVIEWS_JSON_URL1 = paste0('http://api.nytimes.com/svc/movies/v2/reviews/search.json?opening-date=2016-04-21;2016-05-07&api-key=',YOURAPIKEYHERE, '&order=by-title', collapse = "")#url for api results 0-20
+json_file1 <- fromJSON(URLencode(NYTREVIEWS_JSON_URL1))# get json
 df1 <- as.data.frame(json_file1$results) #dataframe for results
 #str(df1) #view structure 
 #colnames(df1) #view column names
@@ -109,7 +109,7 @@ df1s<-df1[,c(1:8)] #subset needed columns
 
 
 #RESULTS 21-40 AS OF 2016-05-07
-NYTREVIEWS_JSON_URL2 = 'http://api.nytimes.com/svc/movies/v2/reviews/search.json?opening-date=2016-04-21;2016-05-07&api-key=YOURAPIKEYHERE&offset=20&order=by-title' #url for api results 20-40
+NYTREVIEWS_JSON_URL2 = paste0('http://api.nytimes.com/svc/movies/v2/reviews/search.json?opening-date=2016-04-21;2016-05-07&api-key=', YOURAPIKEYHERE, '&offset=20&order=by-title', collapse = "") #url for api results 20-40
 json_file2 <- fromJSON(NYTREVIEWS_JSON_URL2) #get json
 df2 <- as.data.frame(json_file2$results) #dataframe for results
 df2s<-df2[,c(1:8)] #subset needed columns
@@ -166,25 +166,20 @@ library(RCurl)
 library(XML)
 library(indicoio)
 
-#Set RCurl pars
-curl <- getCurlHandle()
-agent <- c(R.version$version.string, ",", R.version$platform)
-
 movie_score <- data.frame()
 
-for i in 1:length(combo$url){
-  movie_url <-  combo$url[i] 
-  # Get Review corresponding the url
-  my_movie <- getURL(movie_url, curl = curl, verbose = TRUE)
-  
-  content_review = htmlTreeParse(my_movie, asText=TRUE, useInternalNodes = TRUE, encoding = 'UTF-8')
-  
+for (i in 1:length(combo$url)){
+  movie_url <- combo$url[i] 
+  my_movie <- readLines(movie_url, encoding = "UTF-8")
+  content_review <- htmlTreeParse(my_movie, asText=TRUE, useInternalNodes = TRUE, encoding = 'UTF-8')
   plain.text <- xpathSApply(xmlRoot(content_review), "//p[@class = 'story-body-text story-content']", xmlValue)
-  plain.text <- cat(paste(plain.text, collapse = "\n"))
-  
-  movie_score[i, 1] <- unlist(sentiment(as.character(rm_special(plaint.text)), 
-                                         api_key = 'indicoio_API_Key'))
+  plain.text <- as.data.frame(as.character(paste(plain.text, collapse = " ")))
+  colnames(plain.text) <- "review"
+  plain.text$movie <- combo$display_title[i]
+  plain.text$Sentiment_score <- unlist(sentiment(as.character(rm_special(plain.text$review)),api_key = indico_api_key))
+  movie_score <- rbind(movie_score, plain.text)
 }
+
 combo <- cbind(combo, movie_score)
 ```
 
