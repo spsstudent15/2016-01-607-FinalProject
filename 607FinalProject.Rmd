@@ -196,6 +196,18 @@ We chose the following cities at random:
 paste(locations$City, collapse = ", ")
 ```
 
+```{r, Using Movies CSVs, include = FALSE, eval=FALSE}
+
+movie_titles_1 <- read.csv(file(paste(url,"20160508nytreviews.csv", sep = ""), open="r" ), sep=" ", header=TRUE, stringsAsFactors = FALSE)
+
+movie_titles_2 <- read.csv(file(paste(url,"20160501nytreviews.csv", sep = ""), open="r" ), sep=" ", header=TRUE, stringsAsFactors = FALSE)
+
+movies <- as.data.frame(unique(
+  c(enc2utf8(gsub("â???T", "'",as.character(movie_titles_1$display_title))),
+                                            enc2utf8(gsub("â???T", "'",as.character(movie_titles_2$display_title))))))
+colnames(movies) <- "display_titles"
+```
+
 ```{r, Searching Twitter, eval= FALSE}
 library(indicoio)
 
@@ -209,9 +221,8 @@ search_term <- function(term){
                 }
 
 
-
 df <- NULL
-for (i in combo$display_title){
+for (i in movies$display_titles){
   SearchTerm <- search_term(i)
   for (j in seq(1:length(locations$City))){
       list <- suppressWarnings(searchTwitter(SearchTerm,  
@@ -234,8 +245,8 @@ for (i in combo$display_title){
 
 df$Sentiment_Score <- unlist(sentiment(as.character(rm_special(df$tweet)), 
                                        api_key = '114ffc17022fd58af3da5cfd5f3e4388'))
-
-write.csv(df, file = paste("Tweets for ", as.character(format(Sys.Date() ,format="%m.%d.%Y")), ".csv", sep = ""))
+write.csv(df, file = paste("Tweets for ", as.character(format(Sys.Date(), format="%m.%d.%Y")), ".csv", sep = ""))
+write.csv(combo$display_title, file = "movie titles used.csv")
 
 ```
 
