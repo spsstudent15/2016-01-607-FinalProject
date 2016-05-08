@@ -20,6 +20,7 @@ We set out to compare 2016 New York Times movie reviews and tweets related to a 
 
 ![](twitterlogo.jpg)
 
+
 <p>
 
 We envisioned a sentiment analysis comparison of the two data sources. How favorably did the New York Times review a given movie compared to the average sentiment on Twitter?
@@ -156,7 +157,7 @@ https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/201605
 
 For each URL pointing to an actual movie review, we then scraped the text of the review. Only the actual text of the review was considered. This was indicated by the class = 'story-body-text story-content' under the paragraph tag "< p >".  
 
-We then ran the review text through sentiment analysis with indico, again resulting in a 0-100 score.
+We then ran the review text through sentiment analysis with indico, again resulting in a 0-1 score.
 
 
 ```{r, eval = FALSE}
@@ -203,13 +204,14 @@ Once we established the list of available New York Times movie reviews, we ran t
 
 This chunk retrieved the Twitter search results for a term. `searchTwitter` has some other settings that could probably improve results.
 
-We used the indico package to perform sentiment analysis, resulting in a score of 0-100 for each tweet, 100 being positive.
+We used the indico package to perform sentiment analysis, resulting in a score of 0-1 for each tweet, 1 being extremely positive.
 
 We decided to use unique tweets only, therefore eliminating any retweet data.
 
 For the benefit of our analysis, we filtered the Twitter search results to pull only the tweets which were coded with geographical location.
 
 We chose the following cities at random: 
+
 ```{r, eval=FALSE}
 paste(locations$City, collapse = ", ")
 ```
@@ -261,11 +263,9 @@ for (i in movies$display_titles){
          } 
        }
 
-df$Sentiment_Score <- unlist(sentiment(as.character(rm_special(df$tweet)), 
-                                       api_key = indico_api_key))
+df$Sentiment_Score <- unlist(sentiment(as.character(rm_special(df$tweet)),  api_key = indico_api_key))
 write.csv(df, file = paste("Tweets for ", as.character(format(Sys.Date(), format="%m.%d.%Y")), ".csv", sep = ""))
 write.csv(combo$display_title, file = "movie titles used.csv")
-
 ```
 
 > The resulting CSVs are available here: https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.03.2016.csv
@@ -273,8 +273,6 @@ https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets
 https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.05.2016.csv
 https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.06.2016.csv
 https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.07.2016.csv
-
-
 
 # Data Transformation
 
