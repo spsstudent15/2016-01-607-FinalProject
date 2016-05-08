@@ -91,18 +91,29 @@ suppressWarnings(library(jsonlite))
 suppressWarnings(library(knitr))
 
 #RESULTS 0-20 AS OF 2016-05-07
-NYTREVIEWS_JSON_URL1 = 'http://api.nytimes.com/svc/movies/v2/reviews/search.json?opening-date=2016-04-21;2016-05-07&api-key=YOURAPIKEYHERE'#url for api results 0-20
+NYTREVIEWS_JSON_URL1 = 'http://api.nytimes.com/svc/movies/v2/reviews/search.json?opening-date=2016-04-21;2016-05-07&api-key=YOURAPIKEYHERE&order=by-title'#url for api results 0-20
 json_file1 <- fromJSON(NYTREVIEWS_JSON_URL1)# get json
 df1 <- as.data.frame(json_file1$results) #dataframe for results
 #str(df1) #view structure 
 #colnames(df1) #view column names
 df1s<-df1[,c(1:8)] #subset needed columns
+#kable(df1s) #test
+
 
 #RESULTS 21-40 AS OF 2016-05-07
-NYTREVIEWS_JSON_URL2 = 'http://api.nytimes.com/svc/movies/v2/reviews/search.json?opening-date=2016-04-21;2016-05-07&api-key=YOURAPIKEYHERE&offset=20' #url for api results 20-40
+NYTREVIEWS_JSON_URL2 = 'http://api.nytimes.com/svc/movies/v2/reviews/search.json?opening-date=2016-04-21;2016-05-07&api-key=YOURAPIKEYHERE&offset=20&order=by-title' #url for api results 20-40
 json_file2 <- fromJSON(NYTREVIEWS_JSON_URL2) #get json
 df2 <- as.data.frame(json_file2$results) #dataframe for results
 df2s<-df2[,c(1:8)] #subset needed columns
+
+#kable(df2s) #test
+
+#test
+#NYTREVIEWS_JSON_URL3 = 'http://api.nytimes.com/svc/movies/v2/reviews/search.json?opening-date=2016-04-21;2016-05-07&api-key=YOURAPIKEYHERE&offset=40'
+#json_file3 <- fromJSON(NYTREVIEWS_JSON_URL3) #get json
+#df3 <- as.data.frame(json_file3$results) #dataframe for results
+#df3s<-df3[,c(1:8)] #subset needed columns
+#kable(df3s)
 
 #ALL RESULTS 0-40 COMBINED
 df<- rbind(df1s,df2s) #combine all results
@@ -120,7 +131,11 @@ combo<-cbind(df,urls) #combine reviews and links
 combo<-combo[,c(1:3,7,8,10)] #subset needed columns
 combo<-combo[,c(1,5,4,6,2,3)] #reorder needed columns
 kable(combo, row.names = TRUE) #display with row numbers
+```
 
+
+Exported to CSV.
+```{r, eval=FALSE}
 write.table(combo, "20160508nytreviews.csv") 
 
 ```
@@ -250,7 +265,11 @@ write.csv(combo$display_title, file = "movie titles used.csv")
 
 ```
 
-> The resulting CSV is available here: https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.03.2016.csv
+> The resulting CSVs are available here: https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.03.2016.csv
+https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.04.2016.csv
+https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.05.2016.csv
+https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.06.2016.csv
+https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.07.2016.csv
 
 
 
