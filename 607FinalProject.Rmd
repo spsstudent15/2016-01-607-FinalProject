@@ -8,11 +8,19 @@ output:
     toc_depth: 1
     toc_float: true
     code_folding: show
+    theme: spacelab
 ---
 
 # Introduction and Motivation
 
 We set out to compare 2016 New York Times movie reviews and tweets related to a given set of movies. 
+
+
+![](NYTLogo.jpg)
+
+![](twitterlogo.jpg)
+
+<p>
 
 We envisioned a sentiment analysis comparison of the two data sources. How favorably did the New York Times review a given movie compared to the average sentiment on Twitter?
 
@@ -85,7 +93,7 @@ We used the opening date range 2016-04-21 through 2016-05-07.
 YOURAPIKEYHERE<- "ef056a1d0cdde8b2f03c95bc7dd57722:19:29126896"
 ```
 
-```{r, eval=TRUE}
+```{r, eval=FALSE}
 #required libraries
 suppressWarnings(library(jsonlite))
 suppressWarnings(library(knitr))
@@ -277,9 +285,9 @@ https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets
 
 We combined the Twitter sentiment and New York Times sentiment dataframes to view results.
 
-# Statistical Analysis and Graphics
+# Statistical Analysis
 
-# New Features and Challenges
+# New Features
 
 Twitter API / OAUTH
 
@@ -292,5 +300,7 @@ Indico package
 Collaborating on Slack
 
 Collaborating on Github 
+
+# Challenges
 
 # Insights and Conclusion
