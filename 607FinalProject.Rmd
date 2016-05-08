@@ -244,7 +244,7 @@ for (i in movies$display_titles){
        }
 
 df$Sentiment_Score <- unlist(sentiment(as.character(rm_special(df$tweet)), 
-                                       api_key = '114ffc17022fd58af3da5cfd5f3e4388'))
+                                       api_key = indico_api_key))
 write.csv(df, file = paste("Tweets for ", as.character(format(Sys.Date(), format="%m.%d.%Y")), ".csv", sep = ""))
 write.csv(combo$display_title, file = "movie titles used.csv")
 
