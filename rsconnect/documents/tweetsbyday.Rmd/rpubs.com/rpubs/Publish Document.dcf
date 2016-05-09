@@ -1,0 +1,8 @@
+name: Publish Document
+account: rpubs
+server: rpubs.com
+bundleId:
+        https://api.rpubs.com/api/v1/document/179750/edade28091cd41048964647c260f921f
+url:
+        http://rpubs.com/publish/claim/179750/983cd0bbd583440683c3bd99bf01882f
+when: 1462837550.1376
