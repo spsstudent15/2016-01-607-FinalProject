@@ -182,6 +182,8 @@ library(indicoio)
 
 #Set RCurl pars
 curl <- getCurlHandle()
+curlSetOpt(cookiejar="cookies.txt",  useragent = agent, followlocation = TRUE, curl=curl)
+
 agent <- c(R.version$version.string, ",", R.version$platform)
 
 movie_score <- data.frame()
