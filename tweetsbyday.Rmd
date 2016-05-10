@@ -494,12 +494,10 @@ write.csv(tweets1, file = "tweets503to509.csv")
 ```{r}
 moviesum1<- ddply(tweets1, .(movie), summarize,  Sentiment_Score=mean(Sentiment_Score), Count_of_Tweets=length(tweet)) #summarize by movie
 
-moviesum1<- moviesum1[order(moviesum1$movie),]
+moviesum1$num<-seq.int(nrow(moviesum1)) # add counter row
 
-#moviesum1<-arrange(moviesum1,movie)
-
-#moviesum1$num<-seq.int(nrow(moviesum1)) # add counter row
 dim(moviesum1)
+str(moviesum1)
 kable(moviesum1)
 ```
 
