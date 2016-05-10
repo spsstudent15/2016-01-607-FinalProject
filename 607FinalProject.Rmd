@@ -5,7 +5,7 @@ date: May 2016
 output: 
   html_document:
     toc: true
-    toc_depth: 1
+    toc_depth: 2
     toc_float: true
     code_folding: show
     theme: spacelab
@@ -29,7 +29,9 @@ What could this information show us? How could the resulting analysis be helpful
 
 # Data Science Workflow
 
-We began with an API pull of a list of recent New York Times movie reviews. 
+We began by identifying our project goals and scope, assessing potential data sources, and retrieving the data.
+
+We first performed an API pull of a list of recent New York Times movie reviews. 
 
 We then performed an API pull of recent tweets. We learned that Twitter provides only a limited search history for publicly available tweets. This resulted in an adjustment of our project scope. 
 
@@ -37,11 +39,31 @@ We then adjusted the date range of our New York Times movie list to contain only
 
 We ran a sentiment analysis on the text of the tweets and the text of the movie reviews for the given set of movies.
 
-We created data frames for our data sources, cleaned and trasformed the data, and performed analysis on the resulting datasets.
+We created data frames for our data sources, cleaned and transformed the data, and performed analysis on the resulting datasets.
+
+# Libraries
+
+The following libraries were required.
+
+```{r, Libraries, eval=FALSE}
+library(rmarkdown)
+library(twitteR)
+library(httr)
+library(ROAuth)
+library(jsonlite)
+library(knitr)
+library(RCurl)
+library(XML)
+library(indicoio)
+library(tidyr)
+library(plyr)
+library(dplyr)
+library(ggplot2)
+```
 
 # Sources
 
-## Part 1. Initiate Twitter Search.
+## Part 1. Twitter Search Setup
 
 We registered for a Twitter API key to perform the search of public tweets related to movies. 
 
@@ -84,7 +106,7 @@ setup_twitter_oauth(consumer_key,
 ```
 
 
-## Part 2. Retrieve API of New York Times Movie Reviews.
+## Part 2. NYT Movie Review API
 
 We registered for a New York Times Movie API key to pull the movie review data.
 
@@ -96,8 +118,8 @@ YOURAPIKEYHERE<- "ef056a1d0cdde8b2f03c95bc7dd57722:19:29126896"
 
 ```{r, eval=FALSE}
 #required libraries
-suppressWarnings(library(jsonlite))
-suppressWarnings(library(knitr))
+library(jsonlite)
+library(knitr)
 
 #RESULTS 0-20 AS OF 2016-05-07
 NYTREVIEWS_JSON_URL1 = paste0('http://api.nytimes.com/svc/movies/v2/reviews/search.json?opening-date=2016-04-21;2016-05-07&api-key=',YOURAPIKEYHERE, '&order=by-title', collapse = "")#url for api results 0-20
@@ -144,16 +166,16 @@ kable(combo, row.names = TRUE) #display with row numbers
 
 
 Exported to CSV.
-```{r, eval=FALSE}
-write.table(combo, "20160508nytreviews.csv") 
 
+```{r, eval=FALSE}
+write.table(combo, "nytmovies.csv") 
 ```
 
-> The resulting CSV is available here:
-https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/20160508nytreviews.csv
+The resulting CSV is available here:
 
+<a href="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/nytmovies.csv">List of NYT Movie Reviews</a>
 
-## Part 3. Retrieve New York Times review text for each entry and perform sentiment analysis.
+## Part 3. NYT Sentiment Analysis
 
 For each URL pointing to an actual movie review, we then scraped the text of the review. Only the actual text of the review was considered. This was indicated by the class = 'story-body-text story-content' under the paragraph tag "< p >".  
 
@@ -199,7 +221,7 @@ locations <- read.csv(data.url, sep=",", header=TRUE, stringsAsFactors = FALSE)
 /////
 
 
-## Part 4. Peform Twitter Search and Twitter Sentiment Analysis
+## Part 4. Twitter Sentiment Analysis
 
 Once we established the list of available New York Times movie reviews, we ran the Twitter search using the movie title as a search term. To get better Twitter search results for one-word movies, we added the word "movie" to our search term.
 
@@ -215,6 +237,16 @@ We chose the following cities at random:
 
 ```{r, eval=FALSE}
 paste(locations$City, collapse = ", ")
+```
+
+```{r, eval=TRUE}
+library(knitr)
+library(RCurl)
+citiesurl <- getURL("https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/locations.csv")
+
+citiesxy<- data.frame(read.csv(text=citiesurl))
+
+kable(citiesxy)
 ```
 
 ```{r, Using Movies CSVs, include = FALSE, eval=FALSE}
@@ -269,20 +301,106 @@ write.csv(df, file = paste("Tweets for ", as.character(format(Sys.Date(), format
 write.csv(combo$display_title, file = "movie titles used.csv")
 ```
 
-> The resulting CSVs are available here: https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.03.2016.csv
-https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.04.2016.csv
-https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.05.2016.csv
-https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.06.2016.csv
-https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.07.2016.csv
-https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.08.2016.csv
-https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.09.2016.csv
+The resulting Twitter CSVs for individual days are available here: 
+
+<a href="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.03.2016.csv">Tweets for 20160503</a>
+
+<a href="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.04.2016.csv">Tweets for 20160504</a>
+
+<a href="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.05.2016.csv">Tweets for 20160505</a>
+
+<a href="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.06.2016.csv">Tweets for 20160506</a>
+
+<a href="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.07.2016.csv">Tweets for 20160507</a>
+
+<a href="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.08.2016.csv">Tweets for 20160508</a>
+
+<a href="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.09.2016.csv">Tweets for 20160509</a>
 
 
-# Data Transformation
+# Data Transformation and Analysis
 
-We combined the Twitter sentiment and New York Times sentiment dataframes to view results.
+For our primary twitter dataset, we combined all seven days of tweets into one dataframe of 5,445 records.
 
-# Statistical Analysis
+<a href="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/tweets503to509.csv">Complete Dataset of All Tweets With Sentiment Score</a>
+
+We created a main dataframe to include basic movie information, NYT Critics' Pick score, NYT Review Sentiment Score, Twitter Average Sentiment Score, and Count of Tweets. 
+
+We analyzed each day's worth of tweets separately to identify outliers and possible trends. The complete analysis is available here.
+
+<a href="http://rpubs.com/aapsps/179750">Analysis of Movie Tweets By Day</a>
+
+We then analyzed the complete dataset of tweets.
+
+## Movie Score
+```{r, eval=TRUE, include=FALSE}
+library(tidyr)
+library(plyr)
+library(dplyr)
+library(ggplot2)
+library(knitr)
+library(RCurl)
+```
+
+```{r, eval=FALSE, include=FALSE}
+library(tidyr)
+library(plyr)
+library(dplyr)
+library(ggplot2)
+library(knitr)
+library(RCurl)
+```
+
+
+```{r, eval=TRUE}
+
+tweets1 <- getURL("https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/tweets503to509.csv")
+
+tweets1<- data.frame(read.csv(text=tweets1))
+
+moviesum1<- ddply(tweets1, .(movie), summarize,  Sentiment_Score=mean(Sentiment_Score), Count_of_Tweets=length(tweet)) #summarize by movie
+
+moviesum1$movie<-as.character(moviesum1$movie) #convert levels to character
+moviesum1<- arrange(moviesum1, movie) #sort alphabetically by movie name
+
+moviesum1$num<-seq.int(nrow(moviesum1)) # add counter row
+
+kable(moviesum1)
+```
+
+## City Score
+
+```{r, eval=TRUE}
+citysum1<- ddply(tweets1, .(city), summarize,  Sentiment_Score=mean(Sentiment_Score), Count_of_Tweets=length(tweet)) #summarize by city
+kable(citysum1)
+```
+
+## Movie and City Score
+
+```{r, eval=TRUE}
+moviecitysum1<- ddply(tweets1, .(movie, city), summarize,  Sentiment_Score=mean(Sentiment_Score)) #summarize by movie and city
+
+kable(moviecitysum1)
+```
+
+## Graphs
+
+```{r, eval=TRUE}
+ggplot(
+  moviesum1, aes(x = reorder(movie,Sentiment_Score), y = Sentiment_Score, fill=Sentiment_Score)) + 
+  geom_bar(stat="identity") +
+  ggtitle("Movie Average Sentiment Score")+ 
+  theme(axis.text=element_text(angle=90))+
+  labs(x="Movies",y="Score")
+
+ggplot(
+  citysum1, aes(x = reorder(city,Sentiment_Score), y = Sentiment_Score, fill=Sentiment_Score)) + 
+  geom_bar(stat="identity") +
+  ggtitle("City Average Sentiment Score")+ 
+  theme(axis.text=element_text(angle=90))+
+  labs(x="City",y="Score")
+```
+
 
 # New Features
 
