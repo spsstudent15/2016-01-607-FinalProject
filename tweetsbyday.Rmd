@@ -47,7 +47,7 @@ https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets
 
 https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.08.2016.csv
 
-
+https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.09.2016.csv
 
 
 
@@ -412,10 +412,74 @@ ggplot(
 
 ```
 
+
+# 2016-05-09
+
+## Import CSV
+
+```{r}
+
+x509 <- getURL("https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.09.2016.csv") #import twitter CSV
+tweets509<- data.frame(read.csv(text=x509, header=T)) #create data frame
+kable(head(tweets509,3)) #show head
+#dim(tweets509)
+```
+
+## Movie Score
+
+```{r}
+moviesum509<- ddply(tweets509, .(movie), summarize,  Sentiment_Score=mean(Sentiment_Score), Count_of_Tweets=length(tweet)) #summarize by movie
+kable(moviesum509)
+```
+
+## Movie and City Score
+
+```{r, eval=FALSE}
+moviecitysum509<- ddply(tweets509, .(movie, city), summarize,  Sentiment_Score=mean(Sentiment_Score)) #summarize by movie and city
+kable(moviecitysum509)
+```
+
+## City Score
+
+```{r}
+citysum509<- ddply(tweets509, .(city), summarize,  Sentiment_Score=mean(Sentiment_Score), Count_of_Tweets=length(tweet)) #summarize by city
+kable(citysum509)
+```
+
+## Unique Movies
+
+```{r}
+allmovies509<-unique(tweets509[c("movie")]) # get unique movies
+allmovies509$num<-seq.int(nrow(allmovies509)) # add counter row
+kable(allmovies509) #show unique values for movie name
+
+```
+
+## Graphs
+
+```{r}
+ggplot(
+  moviesum509, aes(x = reorder(movie,Sentiment_Score), y = Sentiment_Score, fill=Sentiment_Score)) + 
+  geom_bar(stat="identity") +
+  ggtitle("Movie Average Sentiment Score")+ 
+  theme(axis.text=element_text(angle=90))+
+  labs(x="Movies",y="Score")
+
+ggplot(
+  citysum509, aes(x = reorder(city,Sentiment_Score), y = Sentiment_Score, fill=Sentiment_Score)) + 
+  geom_bar(stat="identity") +
+  ggtitle("City Average Sentiment Score")+ 
+  theme(axis.text=element_text(angle=90))+
+  labs(x="City",y="Score")
+
+```
+
+
+
 # All Days Combined
 
 ```{r}
-tweets1<- rbind(tweets503,tweets504,tweets505,tweets506,tweets507,tweets508)
+tweets1<- rbind(tweets503,tweets504,tweets505,tweets506,tweets507,tweets508, tweets509)
 
 #kable(head(tweets1))
 #kable(tail(tweets1))
@@ -489,6 +553,7 @@ dim(tweets505)
 dim(tweets506)
 dim(tweets507)
 dim(tweets508)
+dim(tweets509)
 ```
 
 ## Movie Count Per Day
@@ -500,5 +565,6 @@ dim(allmovies505)
 dim(allmovies506)
 dim(allmovies507)
 dim(allmovies508)
+dim(allmovies509)
 
 ```

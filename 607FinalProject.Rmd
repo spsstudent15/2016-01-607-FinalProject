@@ -274,6 +274,9 @@ https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets
 https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.05.2016.csv
 https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.06.2016.csv
 https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.07.2016.csv
+https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.08.2016.csv
+https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.09.2016.csv
+
 
 # Data Transformation
 
@@ -285,8 +288,6 @@ We combined the Twitter sentiment and New York Times sentiment dataframes to vie
 
 Twitter API / OAUTH
 
-Choosing tweets
-
 Testing different sentiment analysis machines
 
 Indico package
@@ -296,5 +297,11 @@ Collaborating on Slack
 Collaborating on Github 
 
 # Challenges
+
+Choosing tweets
+
+Retweets and removing duplicates
+
+Movie titles with common words
 
 # Insights and Conclusion
