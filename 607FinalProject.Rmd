@@ -235,8 +235,11 @@ For the benefit of our analysis, we filtered the Twitter search results to pull 
 
 We chose the following cities at random: 
 
-```{r, eval=FALSE}
-paste(locations$City, collapse = ", ")
+```{r}
+library(leaflet)
+leaflet(locations) %>% 
+  addProviderTiles("Stamen.Toner") %>% 
+  addMarkers(lng = ~Long, lat = ~Lat) 
 ```
 
 ```{r, eval=TRUE}
@@ -280,8 +283,9 @@ for (i in movies$display_titles){
   for (j in seq(1:length(locations$City))){
       list <- suppressWarnings(searchTwitter(SearchTerm,  
                                              since = format(Sys.Date()-1,format="%Y-%m-%d"), 
-                                             until = format(Sys.Date(),format="%Y-%m-%d"), n = 5000, 
-                                    geocode = paste(locations$Lat[j], ",", locations$Long[j], ",30mi", sep = "" )))
+                                             until = format(Sys.Date(),format="%Y-%m-%d"), n = 5000,
+                                             geocode = paste(locations$Lat[j], ",", locations$Long[j], ",30mi", sep = "" )
+                                             ))
           if (length(list) == 0){ 
             NULL
           } else { 
@@ -298,7 +302,6 @@ for (i in movies$display_titles){
 
 df$Sentiment_Score <- unlist(sentiment(as.character(rm_special(df$tweet)),  api_key = indico_api_key))
 write.csv(df, file = paste("Tweets for ", as.character(format(Sys.Date(), format="%m.%d.%Y")), ".csv", sep = ""))
-write.csv(combo$display_title, file = "movie titles used.csv")
 ```
 
 The resulting Twitter CSVs for individual days are available here: 
