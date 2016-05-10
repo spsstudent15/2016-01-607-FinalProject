@@ -2737,21 +2737,29 @@ kable(allmovies509) #show unique values for movie name</code></pre>
 <h1>All Days Combined</h1>
 <pre class="r"><code>tweets1&lt;- rbind(tweets503,tweets504,tweets505,tweets506,tweets507,tweets508, tweets509)
 
+write.csv(tweets1, file = &quot;tweets503to509.csv&quot;)
+
+
 #kable(head(tweets1))
 #kable(tail(tweets1))
 #dim(tweets1)</code></pre>
 <div id="movie-score-7" class="section level2">
 <h2>Movie Score</h2>
 <pre class="r"><code>moviesum1&lt;- ddply(tweets1, .(movie), summarize,  Sentiment_Score=mean(Sentiment_Score), Count_of_Tweets=length(tweet)) #summarize by movie
-moviesum1$num&lt;-seq.int(nrow(moviesum1)) # add counter row
-kable(moviesum1)</code></pre>
+#moviesum1&lt;- moviesum1[order(moviesum1$movie),]
+
+moviesum1&lt;-arrange(moviesum1,movie)
+
+#moviesum1$num&lt;-seq.int(nrow(moviesum1)) # add counter row
+dim(moviesum1)</code></pre>
+<pre><code>## [1] 35  3</code></pre>
+<pre class="r"><code>kable(moviesum1)</code></pre>
 <table>
 <thead>
 <tr class="header">
 <th align="left">movie</th>
 <th align="right">Sentiment_Score</th>
 <th align="right">Count_of_Tweets</th>
-<th align="right">num</th>
 </tr>
 </thead>
 <tbody>
@@ -2759,211 +2767,176 @@ kable(moviesum1)</code></pre>
 <td align="left">A Beautiful Planet</td>
 <td align="right">0.7154244</td>
 <td align="right">93</td>
-<td align="right">1</td>
 </tr>
 <tr class="even">
 <td align="left">Baaghi</td>
 <td align="right">0.5942856</td>
 <td align="right">31</td>
-<td align="right">2</td>
 </tr>
 <tr class="odd">
 <td align="left">Dough</td>
 <td align="right">0.5657804</td>
 <td align="right">31</td>
-<td align="right">3</td>
 </tr>
 <tr class="even">
 <td align="left">Eva Hesse</td>
 <td align="right">0.8257224</td>
-<td align="right">4</td>
 <td align="right">4</td>
 </tr>
 <tr class="odd">
 <td align="left">Green Room</td>
 <td align="right">0.6698322</td>
 <td align="right">245</td>
-<td align="right">5</td>
 </tr>
 <tr class="even">
 <td align="left">Hockney</td>
 <td align="right">0.5284491</td>
 <td align="right">3</td>
-<td align="right">6</td>
 </tr>
 <tr class="odd">
 <td align="left">Keanu</td>
 <td align="right">0.6758887</td>
 <td align="right">1373</td>
-<td align="right">7</td>
 </tr>
 <tr class="even">
 <td align="left">L<U+0092>Attesa (The Wait)</td>
 <td align="right">0.7607310</td>
 <td align="right">3</td>
-<td align="right">8</td>
 </tr>
 <tr class="odd">
 <td align="left">Men &amp; Chicken</td>
 <td align="right">0.6999926</td>
 <td align="right">12</td>
-<td align="right">9</td>
 </tr>
 <tr class="even">
 <td align="left">Mother<U+0092>s Day</td>
 <td align="right">0.7121606</td>
 <td align="right">757</td>
-<td align="right">10</td>
 </tr>
 <tr class="odd">
 <td align="left">Older Than Ireland</td>
 <td align="right">0.3699457</td>
 <td align="right">5</td>
-<td align="right">11</td>
 </tr>
 <tr class="even">
 <td align="left">Pali Road</td>
 <td align="right">0.4949967</td>
 <td align="right">2</td>
-<td align="right">12</td>
 </tr>
 <tr class="odd">
 <td align="left">Papa: Hemingway in Cuba</td>
 <td align="right">0.5584682</td>
 <td align="right">40</td>
-<td align="right">13</td>
 </tr>
 <tr class="even">
 <td align="left">Ratchet &amp; Clank</td>
 <td align="right">0.6233490</td>
 <td align="right">577</td>
-<td align="right">14</td>
 </tr>
 <tr class="odd">
 <td align="left">Sacrifice</td>
 <td align="right">0.7088486</td>
 <td align="right">25</td>
-<td align="right">15</td>
 </tr>
 <tr class="even">
 <td align="left">The American Side</td>
 <td align="right">0.7633015</td>
 <td align="right">2</td>
-<td align="right">16</td>
 </tr>
 <tr class="odd">
 <td align="left">The Family Fang</td>
 <td align="right">0.7278845</td>
 <td align="right">52</td>
-<td align="right">17</td>
 </tr>
 <tr class="even">
 <td align="left">The Man Who Knew Infinity</td>
 <td align="right">0.8592558</td>
 <td align="right">41</td>
-<td align="right">18</td>
 </tr>
 <tr class="odd">
 <td align="left">The Meddler</td>
 <td align="right">0.6350935</td>
 <td align="right">89</td>
-<td align="right">19</td>
 </tr>
 <tr class="even">
 <td align="left">Transfixed</td>
 <td align="right">0.8723244</td>
 <td align="right">1</td>
-<td align="right">20</td>
 </tr>
 <tr class="odd">
 <td align="left">Viktoria</td>
 <td align="right">0.4935801</td>
 <td align="right">5</td>
-<td align="right">21</td>
 </tr>
 <tr class="even">
 <td align="left">Viva</td>
 <td align="right">0.6624109</td>
 <td align="right">58</td>
-<td align="right">22</td>
 </tr>
 <tr class="odd">
 <td align="left">A Bigger Splash</td>
 <td align="right">0.5321993</td>
 <td align="right">51</td>
-<td align="right">23</td>
 </tr>
 <tr class="even">
 <td align="left">A Hologram for the King</td>
 <td align="right">0.7794638</td>
 <td align="right">4</td>
-<td align="right">24</td>
 </tr>
 <tr class="odd">
 <td align="left">Being Charlie</td>
 <td align="right">0.6336846</td>
 <td align="right">17</td>
-<td align="right">25</td>
 </tr>
 <tr class="even">
 <td align="left">Captain America: Civil War</td>
 <td align="right">0.7840031</td>
 <td align="right">1508</td>
-<td align="right">26</td>
 </tr>
 <tr class="odd">
 <td align="left">Dark Horse</td>
 <td align="right">0.6607674</td>
 <td align="right">31</td>
-<td align="right">27</td>
 </tr>
 <tr class="even">
 <td align="left">Elstree 1976</td>
 <td align="right">0.7565491</td>
 <td align="right">14</td>
-<td align="right">28</td>
 </tr>
 <tr class="odd">
 <td align="left">Elvis &amp; Nixon</td>
 <td align="right">0.6066401</td>
 <td align="right">3</td>
-<td align="right">29</td>
 </tr>
 <tr class="even">
 <td align="left">Mother’s Day</td>
 <td align="right">0.7698998</td>
 <td align="right">283</td>
-<td align="right">30</td>
 </tr>
 <tr class="odd">
 <td align="left">Mothers and Daughters</td>
 <td align="right">0.6907826</td>
 <td align="right">54</td>
-<td align="right">31</td>
 </tr>
 <tr class="even">
 <td align="left">Nina</td>
 <td align="right">0.6563754</td>
 <td align="right">14</td>
-<td align="right">32</td>
 </tr>
 <tr class="odd">
 <td align="left">Sin Alas</td>
 <td align="right">0.2750178</td>
 <td align="right">2</td>
-<td align="right">33</td>
 </tr>
 <tr class="even">
 <td align="left">The Offering</td>
 <td align="right">0.4061673</td>
 <td align="right">7</td>
-<td align="right">34</td>
 </tr>
 <tr class="odd">
 <td align="left">Those People</td>
 <td align="right">0.4498706</td>
 <td align="right">8</td>
-<td align="right">35</td>
 </tr>
 </tbody>
 </table>
@@ -2971,6 +2944,7 @@ kable(moviesum1)</code></pre>
 <div id="movie-and-city-score-7" class="section level2">
 <h2>Movie and City Score</h2>
 <pre class="r"><code>moviecitysum1&lt;- ddply(tweets1, .(movie, city), summarize,  Sentiment_Score=mean(Sentiment_Score)) #summarize by movie and city
+
 kable(moviecitysum1)</code></pre>
 </div>
 <div id="city-score-7" class="section level2">

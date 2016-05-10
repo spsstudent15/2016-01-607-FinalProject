@@ -481,6 +481,9 @@ ggplot(
 ```{r}
 tweets1<- rbind(tweets503,tweets504,tweets505,tweets506,tweets507,tweets508, tweets509)
 
+write.csv(tweets1, file = "tweets503to509.csv")
+
+
 #kable(head(tweets1))
 #kable(tail(tweets1))
 #dim(tweets1)
@@ -490,7 +493,13 @@ tweets1<- rbind(tweets503,tweets504,tweets505,tweets506,tweets507,tweets508, twe
 
 ```{r}
 moviesum1<- ddply(tweets1, .(movie), summarize,  Sentiment_Score=mean(Sentiment_Score), Count_of_Tweets=length(tweet)) #summarize by movie
-moviesum1$num<-seq.int(nrow(moviesum1)) # add counter row
+
+moviesum1<- moviesum1[order(moviesum1$movie),]
+
+#moviesum1<-arrange(moviesum1,movie)
+
+#moviesum1$num<-seq.int(nrow(moviesum1)) # add counter row
+dim(moviesum1)
 kable(moviesum1)
 ```
 
@@ -498,6 +507,7 @@ kable(moviesum1)
 
 ```{r, eval=FALSE}
 moviecitysum1<- ddply(tweets1, .(movie, city), summarize,  Sentiment_Score=mean(Sentiment_Score)) #summarize by movie and city
+
 kable(moviecitysum1)
 ```
 
