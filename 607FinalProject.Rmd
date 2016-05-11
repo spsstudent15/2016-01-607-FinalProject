@@ -20,6 +20,7 @@ We set out to compare 2016 New York Times movie reviews and tweets related to a 
 
 ![](twitterlogo.jpg)
 
+<center><img src="https://indico.io/static/img/logo-black.png" height="270px" /></center>
 
 <p>
 
@@ -45,7 +46,7 @@ We created data frames for our data sources, cleaned and transformed the data, a
 
 The following libraries were required.
 
-```{r, Libraries, eval=FALSE}
+```{r, Libraries, eval=TRUE, warning=FALSE, message=FALSE}
 library(rmarkdown)
 library(twitteR)
 library(httr)
@@ -59,6 +60,7 @@ library(tidyr)
 library(plyr)
 library(dplyr)
 library(ggplot2)
+library(leaflet)
 ```
 
 # Sources
@@ -208,11 +210,11 @@ combo <- cbind(combo, movie_score)
 ```
 
 
-```{r, include= FALSE, eval=FALSE}
+```{r, include= FALSE, eval=TRUE}
 url <- "https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/"
 ```
 
-```{r, eval= FALSE}
+```{r, eval= TRUE}
 data.url <- file(paste(url,"locations.csv", sep = ""), open="r" )
 locations <- read.csv(data.url, sep=",", header=TRUE, stringsAsFactors = FALSE)
 ```
@@ -233,13 +235,13 @@ We decided to use unique tweets only, therefore eliminating any retweet data.
 
 For the benefit of our analysis, we filtered the Twitter search results to pull only the tweets which were coded with geographical location.
 
-We chose the following cities at random: 
+We chose the following cities at random: `r paste(str_trim(locations$City), collapse = ", ")`.
 
 ```{r}
 library(leaflet)
 leaflet(locations) %>% 
   addProviderTiles("Stamen.Toner") %>% 
-  addMarkers(lng = ~Long, lat = ~Lat) 
+  addMarkers(lng = ~Long, lat = ~Lat, popup = paste(as.character(str_trim(locations$City))))
 ```
 
 ```{r, eval=TRUE}
@@ -360,12 +362,20 @@ library(RCurl)
 tweets1 <- getURL("https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/tweets503to509.csv")
 
 tweets1<- data.frame(read.csv(text=tweets1))
+```
 
+```{r, exceptions, eval = TRUE}
+tweets1$city[tweets1$city == 'los Angeles'] <- 'Los Angeles'
+tweets1$movie <- encodeString(as.character(tweets1$movie))
+tweets1$movie[tweets1$movie == 'Mother<U+0092>s Day'] <- "Mother's Day"
+tweets1$movie[tweets1$movie == "L<U+0092>Attesa (The Wait)"] <- "L'Attesa (The Wait)"
+```
+
+```{r}
 moviesum1<- ddply(tweets1, .(movie), summarize,  Sentiment_Score=mean(Sentiment_Score), Count_of_Tweets=length(tweet)) #summarize by movie
 
 moviesum1$movie<-as.character(moviesum1$movie) #convert levels to character
 moviesum1<- arrange(moviesum1, movie) #sort alphabetically by movie name
-
 moviesum1$num<-seq.int(nrow(moviesum1)) # add counter row
 
 kable(moviesum1)
@@ -382,13 +392,13 @@ kable(citysum1)
 
 ```{r, eval=TRUE}
 moviecitysum1<- ddply(tweets1, .(movie, city), summarize,  Sentiment_Score=mean(Sentiment_Score)) #summarize by movie and city
-
 kable(moviecitysum1)
 ```
 
 ## Graphs
 
 ```{r, eval=TRUE}
+
 ggplot(
   moviesum1, aes(x = reorder(movie,Sentiment_Score), y = Sentiment_Score, fill=Sentiment_Score)) + 
   geom_bar(stat="identity") +
@@ -402,6 +412,51 @@ ggplot(
   ggtitle("City Average Sentiment Score")+ 
   theme(axis.text=element_text(angle=90))+
   labs(x="City",y="Score")
+```
+
+# Box Plot of Sentiment Scores by Top Movies
+
+```{r, warning=FALSE, message=FALSE, height=800, width = 600}
+library(plotly)
+
+top_movies <- ddply(tweets1, ~movie, summarize, tweet_count = length(tweet))
+top_movies <- top_movies[order(-top_movies$tweet_count),]
+n <- 10
+top_movies <- head(top_movies$movie, n = n)
+data.url <- file(paste(url,"movie_score.csv", sep = ""), open="r" )
+movies_score_NYT <- read.csv(data.url, sep=",", header=TRUE, stringsAsFactors = FALSE)
+movies_score_NYT$movie[movies_score_NYT$X == 22] <- "Mother's Day"
+movies_score_NYT_subset <- subset(movies_score_NYT, movies_score_NYT$movie %in% top_movies)
+
+a <- list()
+for (i in seq_len(nrow(movies_score_NYT_subset ))) {
+  m <- movies_score_NYT_subset [i, ]
+  a[[i]] <- list(
+  x = movies_score_NYT_subset$movie[i],
+  y = movies_score_NYT_subset$Sentiment_score[i],
+  text = paste("NYT Score: ", signif(movies_score_NYT_subset$Sentiment_score[i],5)),
+  xref = "x",
+  yref = "y",
+  showarrow = TRUE,
+  arrowhead = 7,
+  ax = 10,
+  ay = -20
+  )
+}
+
+xlabel <- list(title = "Movie")
+ylabel <- list(title = "Setiment Score")
+
+plot_ly(subset(tweets1, tweets1$movie %in% top_movies), 
+        y = Sentiment_Score, 
+        color= movie, 
+        type = "box", 
+        boxpoints = "all", jitter = 0.3) %>%
+  layout(title = sprintf("Box Plot of Movie Tweets for top %s movies", n),
+         xaxis = xlabel, 
+         yaxis = ylabel,
+         annotations = a) 
+
 ```
 
 
