@@ -16,9 +16,13 @@ output:
 We set out to compare 2016 New York Times movie reviews and tweets related to a given set of movies. 
 
 
-![](NYTLogo.jpg)
+<center><img src="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/NYTLogo.jpg" height="270px" /></center>
 
-![](twitterlogo.jpg)
+<p>
+
+<center><img src="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/twitterlogo.jpg" height="270px" /></center>
+
+<p>
 
 <center><img src="https://indico.io/static/img/logo-black.png" height="270px" /></center>
 
@@ -47,20 +51,24 @@ We created data frames for our data sources, cleaned and transformed the data, a
 The following libraries were required.
 
 ```{r, Libraries, eval=TRUE, warning=FALSE, message=FALSE}
-library(rmarkdown)
-library(twitteR)
+
+#library(indicoio)
+library(ggplot2)
 library(httr)
-library(ROAuth)
 library(jsonlite)
 library(knitr)
-library(RCurl)
-library(XML)
-library(indicoio)
-library(tidyr)
+library(leaflet)
+library(plotly)
 library(plyr)
 library(dplyr)
-library(ggplot2)
-library(leaflet)
+library(RCurl)
+library(rmarkdown)
+library(ROAuth)
+library(stringr)
+library(tidyr)
+library(twitteR)
+library(XML)
+
 ```
 
 # Sources
@@ -235,9 +243,10 @@ We decided to use unique tweets only, therefore eliminating any retweet data.
 
 For the benefit of our analysis, we filtered the Twitter search results to pull only the tweets which were coded with geographical location.
 
-We chose the following cities at random: `r paste(str_trim(locations$City), collapse = ", ")`.
+We chose the following cities at random: 
+'r paste(str_trim(locations$City), collapse = ", ")`.
 
-```{r}
+```{r, eval=TRUE}
 library(leaflet)
 leaflet(locations) %>% 
   addProviderTiles("Stamen.Toner") %>% 
@@ -254,7 +263,7 @@ citiesxy<- data.frame(read.csv(text=citiesurl))
 kable(citiesxy)
 ```
 
-```{r, Using Movies CSVs, include = FALSE, eval=FALSE}
+```{r, Using Movies CSVs, include = FALSE, eval=true}
 
 movie_titles_1 <- read.csv(file(paste(url,"20160508nytreviews.csv", sep = ""), open="r" ), sep=" ", header=TRUE, stringsAsFactors = FALSE)
 
@@ -262,8 +271,9 @@ movie_titles_2 <- read.csv(file(paste(url,"20160501nytreviews.csv", sep = ""), o
 
 movies <- as.data.frame(unique(
   c(enc2utf8(gsub("â???T", "'",as.character(movie_titles_1$display_title))),
-                                            enc2utf8(gsub("â???T", "'",as.character(movie_titles_2$display_title))))))
+                                          enc2utf8(gsub("â???T", "'",as.character(movie_titles_2$display_title))))))
 colnames(movies) <- "display_titles"
+
 ```
 
 ```{r, Searching Twitter, eval= FALSE}
@@ -338,16 +348,7 @@ We analyzed each day's worth of tweets separately to identify outliers and possi
 We then analyzed the complete dataset of tweets.
 
 ## Movie Score
-```{r, eval=TRUE, include=FALSE}
-library(tidyr)
-library(plyr)
-library(dplyr)
-library(ggplot2)
-library(knitr)
-library(RCurl)
-```
-
-```{r, eval=FALSE, include=FALSE}
+```{r, eval=TRUE, include=FALSE, warning=FALSE, message=FALSE}
 library(tidyr)
 library(plyr)
 library(dplyr)
@@ -371,7 +372,7 @@ tweets1$movie[tweets1$movie == 'Mother<U+0092>s Day'] <- "Mother's Day"
 tweets1$movie[tweets1$movie == "L<U+0092>Attesa (The Wait)"] <- "L'Attesa (The Wait)"
 ```
 
-```{r}
+```{r, eval=TRUE}
 moviesum1<- ddply(tweets1, .(movie), summarize,  Sentiment_Score=mean(Sentiment_Score), Count_of_Tweets=length(tweet)) #summarize by movie
 
 moviesum1$movie<-as.character(moviesum1$movie) #convert levels to character
@@ -390,12 +391,14 @@ kable(citysum1)
 
 ## Movie and City Score
 
-```{r, eval=TRUE}
+```{r, eval=FALSE}
 moviecitysum1<- ddply(tweets1, .(movie, city), summarize,  Sentiment_Score=mean(Sentiment_Score)) #summarize by movie and city
 kable(moviecitysum1)
 ```
 
-## Graphs
+# Visualization
+
+## Bar Plots
 
 ```{r, eval=TRUE}
 
@@ -414,9 +417,9 @@ ggplot(
   labs(x="City",y="Score")
 ```
 
-# Box Plot of Sentiment Scores by Top Movies
+## Box Plots
 
-```{r, warning=FALSE, message=FALSE, height=800, width = 600}
+```{r, eval=TRUE, warning=FALSE, message=FALSE, height=800, width = 600}
 library(plotly)
 
 top_movies <- ddply(tweets1, ~movie, summarize, tweet_count = length(tweet))
