@@ -458,9 +458,12 @@ plot_ly(subset(tweets1, tweets1$movie %in% top_movies),
          xaxis = xlabel, 
          yaxis = ylabel,
          annotations = a,
-         autosize = F, width = 1100, height = 800, margin = m) 
+         autosize = F, width = 1000, height = 800, margin = m) 
 
 ```
+
+<br><br><br><br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br>
 
 ```{r}
 library(RColorBrewer)
@@ -478,10 +481,10 @@ leaflet(mapped_tweets_top) %>%
   addCircles(lng = ~jitter(Long, factor = 20), lat = ~jitter(Lat, factor = 20), weight = 2,
     radius = ~score*100000, 
     popup =paste("<font color=", factpal(mapped_tweets_top$movie), ">" , 
-                 "Movie:", as.character(mapped_tweets$movie), "<br>", "Sentiment Score:", 
-                           as.character(signif(mapped_tweets$score,3)), "</font>"),
+                 "Movie:", as.character(mapped_tweets_top$movie), "<br>", "Sentiment Score:", 
+                           as.character(signif(mapped_tweets_top$score,3)), "</font>"),
     color = ~factpal(mapped_tweets_top$movie),
-    fillOpacity = 0.1)
+    fillOpacity = 0.4)
 
 ```
 
