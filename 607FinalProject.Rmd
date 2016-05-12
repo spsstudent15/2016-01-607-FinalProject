@@ -46,6 +46,8 @@ We ran a sentiment analysis on the text of the tweets and the text of the movie 
 
 We created data frames for our data sources, cleaned and transformed the data, and performed analysis on the resulting datasets.
 
+<center><img src="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Diagram.PNG" height="800px" /></center>
+
 # Libraries
 
 The following libraries were required.
