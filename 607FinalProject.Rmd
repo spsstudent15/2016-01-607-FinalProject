@@ -438,30 +438,50 @@ for (i in seq_len(nrow(movies_score_NYT_subset ))) {
   x = movies_score_NYT_subset$movie[i],
   y = movies_score_NYT_subset$Sentiment_score[i],
   text = paste("NYT Score: ", signif(movies_score_NYT_subset$Sentiment_score[i],5)),
-  xref = "x",
-  yref = "y",
-  showarrow = TRUE,
-  arrowhead = 7,
-  ax = 10,
-  ay = -20
+  xref = "x", yref = "y", showarrow = TRUE,  arrowhead = 7,  ax = 10,  ay = -20
   )
 }
+
+m = list( l = 50,  r = 50,  b = 150,  t = 100,  pad = 5)
 
 xlabel <- list(title = "Movie")
 ylabel <- list(title = "Setiment Score")
 
 plot_ly(subset(tweets1, tweets1$movie %in% top_movies), 
         y = Sentiment_Score, 
-        color= movie, 
+        color = movie, 
         type = "box", 
         boxpoints = "all", jitter = 0.3) %>%
   layout(title = sprintf("Box Plot of Movie Tweets for top %s movies", n),
          xaxis = xlabel, 
          yaxis = ylabel,
-         annotations = a) 
+         annotations = a,
+         autosize = F, width = 1100, height = 800, margin = m) 
 
 ```
 
+```{r}
+library(RColorBrewer)
+
+mapped_tweets <- merge(tweets1, locations, all.x = TRUE, by.y = "City", by.x = "city")  %>%
+                group_by(movie, city, Long, Lat) %>%
+                summarise( score = mean(Sentiment_Score))
+
+mapped_tweets_top <- subset(mapped_tweets, mapped_tweets$movie %in% top_movies)
+
+factpal <- colorFactor(brewer.pal(10, "Spectral"), mapped_tweets_top$movie)
+
+leaflet(mapped_tweets_top) %>% 
+  addProviderTiles("Stamen.Toner") %>%
+  addCircles(lng = ~jitter(Long, factor = 20), lat = ~jitter(Lat, factor = 20), weight = 2,
+    radius = ~score*100000, 
+    popup =paste("<font color=", factpal(mapped_tweets_top$movie), ">" , 
+                 "Movie:", as.character(mapped_tweets$movie), "<br>", "Sentiment Score:", 
+                           as.character(signif(mapped_tweets$score,3)), "</font>"),
+    color = ~factpal(mapped_tweets_top$movie),
+    fillOpacity = 0.1)
+
+```
 
 # New Features
 
