@@ -528,13 +528,24 @@ leaflet(mapped_tweets_top) %>%
 
 # New Features
 
-Twitter API / OAUTH
+## Twitter API / OAUTH
 
-Testing different sentiment analysis machines
+We utilized the Twitter API to develop our collection of tweets. Using the `twitteR` package we were able to pull tweets for locations by setting the geocode location and radius. 
 
-Indico package
+## Testing different sentiment analysis machines
+
+We started out trying to using the bag of words method to count positive and negative words within the tweet to get the positivity score. The problem with this method was that many of the words we had did not show up in tweets and the context of the tweet was typically misclassified. 
+
+We realized that we needed to get some help to get a more accurate sentiment analysis. We looked into several APIs such as IBM's [AlchemyAPI](http://www.alchemyapi.com/api/sentiment-analysis) but most were not accessible using `R`. We ended up using Indico since it offered a free tier and had developed an `R` package to allow for ease of use. 
+
+## Indico package
+
+We used the Indico Sentiment Analysis API to analyze our text to return the positity on a scale from 0-1. We tested out several obviously bad and positive tweets and the response was very accurate. 
+
+ > Indico Benchmark: The API performs with 93% accuracy on the IMDB dataset (state of the art).
 
 Collaborating on Slack
+
 
 Collaborating on Github 
 
@@ -547,3 +558,6 @@ Retweets and removing duplicates
 Movie titles with common words
 
 # Insights and Conclusion
+
+Twitter has a limitation on interpretability, it is useful as a proof of concept but cannot be the sole source of information. Many tweets were commerical advertisements and had unhelpful links. Twitter is a useful tool to explore but I would not build a data product exclusively with it. 
+
