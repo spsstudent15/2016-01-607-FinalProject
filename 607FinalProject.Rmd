@@ -58,6 +58,7 @@ library(indicoio)
 ```
 
 ```{r, Libraries, eval=TRUE, warning=FALSE, message=FALSE}
+library(DT)
 library(ggplot2)
 library(httr)
 library(jsonlite)
@@ -431,8 +432,20 @@ data.url <- file(paste(url,"movie_score_nyt.csv", sep = ""), open="r" )
 reviewscore <- read.csv(data.url, sep=",", header=TRUE, stringsAsFactors = FALSE)
 
 reviewscore<-reviewscore[,c(2:5,7:8,10:11)] #subset needed columns
-kable(reviewscore)
+#kable(reviewscore)
 close(data.url)
+```
+
+```{r, eval=TRUE, warning= FALSE}
+nytsent<-getURL("https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/sentimentsummarynyt.csv")
+
+df<- data.frame(read.csv(text=nytsent))
+
+data<-df[,c(3:9)]
+data$Sentiment_Score_nyt=round(data$Sentiment_Score_nyt,2)
+#data$Sentiment_Score=round(data$Sentiment_Score,2)
+
+datatable(data, options = list(columnDefs = list(list(className = 'dt-center', targets = 5)), pageLength = 5, lengthMenu = c(5, 10, 40)), rownames= TRUE)
 ```
 
 
@@ -455,7 +468,7 @@ We analyzed each day's worth of tweets separately to identify outliers and possi
 
 ### Twitter Combined Data
 
-We then analyzed the full dataset of all tweets combined. We combined all seven days of tweets into one dataframe of 5,445 records. This served as our primary Twitter dataset.
+We combined all seven days of tweets into one dataframe of 5,445 records. This served as our primary Twitter dataset.
 
 ### Twitter Sentiment Summary
 
@@ -495,9 +508,18 @@ moviesum1<- arrange(moviesum1, movie) #sort alphabetically by movie name
 #moviesum1$num<-seq.int(nrow(moviesum1)) # add counter row
 
 names(moviesum1)<-c("Movie","Sentiment_Score","Count_of_Tweets")
-kable(moviesum1, row.names = TRUE)
 ```
 
+```{r, eval=TRUE, warning= FALSE}
+twittersent<-getURL("https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/sentimentsummarytwitter.csv")
+
+df<- data.frame(read.csv(text=twittersent))
+
+data<-df[,c(2:4)]
+data$Sentiment_Score=round(data$Sentiment_Score,2)
+
+datatable(data, options = list(columnDefs = list(list(className = 'dt-center', targets = 5)), pageLength = 5, lengthMenu = c(5, 10, 40)), rownames= TRUE)
+```
 
 ```{r, eval= FALSE}
 write.csv(moviesum1, file = "sentimentsummarytwitter.csv", sep = ",")
@@ -643,7 +665,7 @@ We used the Indico Sentiment Analysis API to analyze our text to return the posi
 
 ## Collaborating on Slack
 
-We found Slack easy to use with a pleasant user interface and file sharing options. Slack may be more useful for larger groups. For our 3-person group, we found that email was mostly manageable. Since we were already checking in on email, RPubs, and Github, Slack seemed like one more thing to check.
+We found Slack easy to use with a pleasant user interface and file sharing options. Slack may be more useful for larger groups. For our three-person group, we found that email was mostly manageable. Since we were already checking in on email, RPubs, and Github, Slack seemed like one more thing to check.
 
 ## Collaborating on Github 
 
