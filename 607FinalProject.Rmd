@@ -436,16 +436,16 @@ reviewscore<-reviewscore[,c(2:5,7:8,10:11)] #subset needed columns
 close(data.url)
 ```
 
-```{r, eval=TRUE, warning= FALSE}
+```{r, eval=TRUE, warning= FALSE, message=FALSE}
 nytsent<-getURL("https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/sentimentsummarynyt.csv")
 
 df<- data.frame(read.csv(text=nytsent))
 
-data<-df[,c(3:9)]
-data$Sentiment_Score_nyt=round(data$Sentiment_Score_nyt,2)
+datanyt<-df[,c(3:4,7:9)]
+datanyt$Sentiment_Score_nyt=round(datanyt$Sentiment_Score_nyt,2)
 #data$Sentiment_Score=round(data$Sentiment_Score,2)
 
-datatable(data, options = list(columnDefs = list(list(className = 'dt-center', targets = 5)), pageLength = 5, lengthMenu = c(5, 10, 40)), rownames= TRUE)
+datatable(datanyt, options = list(columnDefs = list(list(className = 'dt-center', targets = 5)), pageLength = 5, lengthMenu = c(5, 10, 40)), rownames= TRUE)
 ```
 
 
@@ -510,16 +510,17 @@ moviesum1<- arrange(moviesum1, movie) #sort alphabetically by movie name
 names(moviesum1)<-c("Movie","Sentiment_Score","Count_of_Tweets")
 ```
 
-```{r, eval=TRUE, warning= FALSE}
+```{r, eval=TRUE, warning= FALSE, message=FALSE}
 twittersent<-getURL("https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/sentimentsummarytwitter.csv")
 
 df<- data.frame(read.csv(text=twittersent))
 
-data<-df[,c(2:4)]
-data$Sentiment_Score=round(data$Sentiment_Score,2)
+datatw<-df[,c(2:4)]
+datatw$Sentiment_Score=round(datatw$Sentiment_Score,2)
 
-datatable(data, options = list(columnDefs = list(list(className = 'dt-center', targets = 5)), pageLength = 5, lengthMenu = c(5, 10, 40)), rownames= TRUE)
+datatable(datatw, options = list(columnDefs = list(list(className = 'dt-center', targets = 5)), pageLength = 5, lengthMenu = c(5, 10, 40)), rownames= TRUE)
 ```
+
 
 ```{r, eval= FALSE}
 write.csv(moviesum1, file = "sentimentsummarytwitter.csv", sep = ",")
@@ -544,6 +545,22 @@ kable(citysum1, rownames = TRUE)
 moviecitysum1<- ddply(tweets1, .(movie, city), summarize,  Sentiment_Score=mean(Sentiment_Score)) #summarize by movie and city
 kable(moviecitysum1)
 ```
+
+## Comparison
+
+```{r, eval= TRUE, warning= FALSE}
+datanyt<- datanyt %>% left_join(datatw, by = "movie") 
+
+datacombo<- datanyt[,c(1,4,6,3,7,2,5)]
+
+names(datacombo)<-c("Movie","NYT_Sentiment","Twitter_Sentiment","NYT_CriticsPick","Count_of_Tweets","Opening_Date","Genre")
+
+#kable(datacombo)
+
+datatable(datacombo, options = list(columnDefs = list(list(className = 'dt-center', targets = 5)), pageLength = 40, lengthMenu = c(5, 10, 40)), rownames= TRUE)
+
+```
+
 
 # Visualization
 
@@ -642,6 +659,9 @@ leaflet(mapped_tweets_top) %>%
 
 
 ```
+
+<br>
+<br>
 
 # New Features
 
