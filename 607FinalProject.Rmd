@@ -188,9 +188,7 @@ The resulting CSV is available here:
 
 ## Part 3. NYT Sentiment Analysis
 
-### Data Retrieval and Sentiment Analysis  
-
-For each URL pointing to an actual movie review, we then scraped the text of the review. Only the actual text of the review was considered. This was indicated by the class = 'story-body-text story-content' under the paragraph tag "< p >". In addition, we will retrieve the genre of the movie listed in the individual review.  The genres are indicated by the following tag <span itemprop='genre' class='genre>. For movies categorized as more than one genre, we retrieved only the first genre tag. 
+For each URL pointing to a movie review, we then scraped the text of the review. Only the actual text of the review was considered. This was indicated by the class = 'story-body-text story-content' under the paragraph tag "< p >". In addition, we retrieved the genre of the movie listed in the individual review.  The genres are indicated by the following tag <span itemprop='genre' class='genre>. For movies categorized as more than one genre, we retrieved only the first genre tag. 
 
 We then ran the review text through sentiment analysis with indico, resulting in a 0-1 score, with 1 being most positive.
 
@@ -261,39 +259,6 @@ The resulting CSV is available here:
 <a href="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/movie_score_nyt.csv">NYT Movie Reviews With Full Text and Sentiment Score</a>
 
 
-### Sentiment Analysis Litmus Test  
-
-We performed a sentiment analysis litmus test for New York Times reviews. The Times does not provide "stars" to rate their movie reviews but favorable reviews will be tagged with a "Critics' Pick". As a test for the sentiment analysis accuracy, we analyzed the results as follows:  
-
-We considered a "good" score any score >= 0,75 and expected the movie to be tagged with "Critics's Pick" (value = 1).  
-
-We looked at Pick/Good (True Positive), Pick/Bad (False Negative), NotPick/Good (False Positive), NotPick/Bad (True Negative).
-
-```{r, eval = TRUE, warning=FALSE}
-url <- "https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/"
-data.url <- file(paste(url,"movie_score_nyt.csv", sep = ""), open="r" )
-movie_score_nyt <- read.csv(data.url, sep=",", header=TRUE, stringsAsFactors = FALSE)
-
-nyt_false_positive <- movie_score_nyt %>% filter(Sentiment_Score_nyt < 0.75 & critics_pick == 1) %>% 
-                    select(movie, mpaa_rating, genre, Sentiment_Score_nyt, critics_pick)
-
-nyt_false_negative <- movie_score_nyt %>% filter(Sentiment_Score_nyt >= 0.75 & critics_pick == 0) %>% 
-                     select(movie, mpaa_rating, genre, Sentiment_Score_nyt, critics_pick)
- 
-nyt_true_negative <- movie_score_nyt %>% filter(Sentiment_Score_nyt < 0.75 & critics_pick == 0) %>% 
-                     select(movie, mpaa_rating, genre, Sentiment_Score_nyt, critics_pick)
-
-nyt_true_positive <- movie_score_nyt %>% filter(Sentiment_Score_nyt >= 0.75 & critics_pick == 1) %>% 
-                      select(movie, mpaa_rating, genre, Sentiment_Score_nyt, critics_pick)
-
-close(data.url)
-
-```
-
-Percentage of False Positive: `r scales::percent(nrow(nyt_false_positive)/nrow(movie_score_nyt))`    
-Percentage of False Negative: `r scales::percent(nrow(nyt_false_negative)/nrow(movie_score_nyt))`   
-Percentage of True Positive:  `r scales::percent(nrow(nyt_true_positive)/nrow(movie_score_nyt))`   
-Percentage of True Negative:  `r scales::percent(nrow(nyt_true_negative)/nrow(movie_score_nyt))`   
 
 ## Part 4. Twitter Sentiment Analysis
 
@@ -421,6 +386,42 @@ The resulting Twitter CSVs for individual days are available here:
 
 ## New York Times
 
+### New York Times Sentiment Analysis Litmus Test  
+
+We performed a sentiment analysis litmus test for New York Times reviews. The Times does not provide "stars" to rate their movie reviews but favorable reviews will be tagged with a "Critics' Pick." As a test for the sentiment analysis accuracy, we analyzed the results as follows:  
+
+We considered a "good" score any score >= 0.75 and expected the movie to be tagged with "Critics's Pick" (value = 1).  
+
+We looked at Pick/Good (True Positive), Pick/Bad (False Negative), NotPick/Good (False Positive), NotPick/Bad (True Negative).
+
+```{r, eval = TRUE, warning=FALSE}
+url <- "https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/"
+data.url <- file(paste(url,"movie_score_nyt.csv", sep = ""), open="r" )
+movie_score_nyt <- read.csv(data.url, sep=",", header=TRUE, stringsAsFactors = FALSE)
+
+nyt_false_positive <- movie_score_nyt %>% filter(Sentiment_Score_nyt < 0.75 & critics_pick == 1) %>% 
+                    select(movie, mpaa_rating, genre, Sentiment_Score_nyt, critics_pick)
+
+nyt_false_negative <- movie_score_nyt %>% filter(Sentiment_Score_nyt >= 0.75 & critics_pick == 0) %>% 
+                     select(movie, mpaa_rating, genre, Sentiment_Score_nyt, critics_pick)
+ 
+nyt_true_negative <- movie_score_nyt %>% filter(Sentiment_Score_nyt < 0.75 & critics_pick == 0) %>% 
+                     select(movie, mpaa_rating, genre, Sentiment_Score_nyt, critics_pick)
+
+nyt_true_positive <- movie_score_nyt %>% filter(Sentiment_Score_nyt >= 0.75 & critics_pick == 1) %>% 
+                      select(movie, mpaa_rating, genre, Sentiment_Score_nyt, critics_pick)
+
+close(data.url)
+
+```
+
+Percentage of False Positive: `r scales::percent(nrow(nyt_false_positive)/nrow(movie_score_nyt))`    
+Percentage of False Negative: `r scales::percent(nrow(nyt_false_negative)/nrow(movie_score_nyt))`   
+Percentage of True Positive:  `r scales::percent(nrow(nyt_true_positive)/nrow(movie_score_nyt))`   
+Percentage of True Negative:  `r scales::percent(nrow(nyt_true_negative)/nrow(movie_score_nyt))`   
+
+### New York Times Sentiment Summary
+
 For the New York Times data, we created a sentiment score summary table without the full review text for easier analysis.
 
 ```{r, eval= TRUE, warning= FALSE}
@@ -455,6 +456,8 @@ We analyzed each day's worth of tweets separately to identify outliers and possi
 ### Twitter Combined Data
 
 We then analyzed the full dataset of all tweets combined. We combined all seven days of tweets into one dataframe of 5,445 records. This served as our primary Twitter dataset.
+
+### Twitter Sentiment Summary
 
 We looked at the average Twitter Sentiment by movie. This returned fewer movies than had New York Times reviews. More obscure or independent movies, or movies with limited releases, were less likely to have mentions on Twitter.
 
