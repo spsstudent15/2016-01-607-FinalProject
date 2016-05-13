@@ -183,6 +183,8 @@ The resulting CSV is available here:
 
 ## Part 3. NYT Sentiment Analysis
 
+###Data Retrieval and Sentiment Analysis  
+
 For each URL pointing to an actual movie review, we then scraped the text of the review. Only the actual text of the review was considered. This was indicated by the class = 'story-body-text story-content' under the paragraph tag "< p >".  In addition, we will retrieve the genre of the movie listed in the individual review.  The Genres are indicated by the following tag <span itemprop='genre' class='genre>.  We will only retrieve the first genre tag. 
 
 We then ran the review text through sentiment analysis with indico, again resulting in a 0-1 score.
@@ -250,6 +252,11 @@ write.csv(movie_score_nyt, file = "movie_df.csv", sep = ",")
 ```
 
 The full dataframe for NYT movie reviews can be found on GitHub at:  
+[https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/movie_score_nyt.csv](movie_score_nyt.csv)
+
+###Sentiment Analysis litmus test  
+How did the sentiment analysis for NY Times reviews performed.  The NY Times does not provide "stars" to rate their movie reviews but favorable reviews will be tagged with a "Critics' Pick".  As a test for the sentiment analysis accuracy, we will analyse the results as follows:  
+
 
 
 ```{r, include= FALSE, eval=TRUE}
