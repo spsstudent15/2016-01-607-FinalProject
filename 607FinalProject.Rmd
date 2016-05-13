@@ -16,15 +16,15 @@ output:
 We set out to compare 2016 New York Times movie reviews and tweets related to a given set of movies. 
 
 
-<center><img src="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/NYTLogo.jpg" height="270px" /></center>
+<center><img src="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/NYTLogo.jpg" width="500px" /></center>
 
 <p>
 
-<center><img src="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/twitterlogo.jpg" height="270px" /></center>
+<center><img src="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/twitterlogo.jpg" width="500px" /></center>
 
 <p>
 
-<center><img src="https://indico.io/static/img/logo-black.png" height="270px" /></center>
+<center><img src="https://indico.io/static/img/logo-black.png" width="500px" /></center>
 
 <p>
 
