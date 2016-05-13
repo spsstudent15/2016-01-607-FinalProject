@@ -255,7 +255,33 @@ The full dataframe for NYT movie reviews can be found on GitHub at:
 [https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/movie_score_nyt.csv](movie_score_nyt.csv)
 
 ###Sentiment Analysis litmus test  
+
 How did the sentiment analysis for NY Times reviews performed.  The NY Times does not provide "stars" to rate their movie reviews but favorable reviews will be tagged with a "Critics' Pick".  As a test for the sentiment analysis accuracy, we will analyse the results as follows:  
+
+We will consider a "good" score any score >= 0,75 and would expect the movie to be tagged with "Critics's Pick" (value = 1).  
+
+We will take a look at Pick/Good (True Positive), Pick/Bad (False Negative), NotPick/Good (False Positive), NotPick/Bad (True Negative)
+
+```{r, eval = TRUE}
+
+nyt_false_positive <- movie_score_nyt %>% filter(Sentiment_Score_nyt < 0.75 & critics_pick == 1) %>% 
+                    select(movie, mpaa_rating, genre, Sentiment_Score_nyt, critics_pick)
+
+nyt_false_negative <- movie_score_nyt %>% filter(Sentiment_Score_nyt >= 0.75 & critics_pick == 0) %>% 
+                     select(movie, mpaa_rating, genre, Sentiment_Score_nyt, critics_pick)
+ 
+nyt_true_negative <- movie_score_nyt %>% filter(Sentiment_Score_nyt < 0.75 & critics_pick == 0) %>% 
+                     select(movie, mpaa_rating, genre, Sentiment_Score_nyt, critics_pick)
+
+nyt_true_positive <- movie_score_nyt %>% filter(Sentiment_Score_nyt >= 0.75 & critics_pick == 1) %>% 
+                      select(movie, mpaa_rating, genre, Sentiment_Score_nyt, critics_pick)
+
+```
+
+Percentage of False Positive: `r (nrow(nyt_false_positive)/nrow(movie_score_nyt) * 100)  
+Percentage of False Negative: `r (nrow(nyt_false_negative)/nrow(movie_score_nyt) * 100)
+Percentage of True Positive:  `r (nrow(nyt_true_positive)/nrow(movie_score_nyt) * 100)
+Percentage of True Negative:  `r (nrow(nyt_true_negative)/nrow(movie_score_nyt) * 100)   
 
 
 
