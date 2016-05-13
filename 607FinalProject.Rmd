@@ -530,7 +530,7 @@ leaflet(mapped_tweets_top) %>%
 
 ## Twitter API / OAUTH
 
-We utilized the Twitter API to develop our collection of tweets. Using the `twitteR` package we were able to pull tweets for locations by setting the geocode location and radius. 
+We utilized the Twitter API to develop our collection of tweets. Using the `twitteR` package we were able to pull tweets for locations by setting the geocode location and radius. OAuth was necessary because the `twitteR` uses the Developer API to search tweets based on our settings, it also required interaction by allowing the application access by putting in a key given by Twitter. 
 
 ## Testing different sentiment analysis machines
 
