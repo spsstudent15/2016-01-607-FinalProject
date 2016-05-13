@@ -536,7 +536,7 @@ We utilized the Twitter API to develop our collection of tweets. Using the `twit
 
 We started out trying to using the bag of words method to count positive and negative words within the tweet to get the positivity score. The problem with this method was that many of the words we had did not show up in tweets and the context of the tweet was typically misclassified. 
 
-We realized that we needed to get some help to get a more accurate sentiment analysis. We looked into several APIs such as IBM's [AlchemyAPI](http://www.alchemyapi.com/api/sentiment-analysis) but most were not accessible using `R`. We ended up using Indico since it offered a free tier and had developed an `R` package to allow for ease of use. 
+We realized that we needed to get some help to get a more accurate sentiment analysis. We looked into several APIs such as IBM's [AlchemyAPI](http://www.alchemyapi.com/api/sentiment-analysis). We ended up using Indico since it offered a free tier and they had developed an easy to use `R` package. 
 
 ## Indico package
 
