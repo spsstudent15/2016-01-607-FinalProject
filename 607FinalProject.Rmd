@@ -185,39 +185,77 @@ write.table(combo, "nytmovies.csv")
 
 The resulting CSV is available here:
 
-<a href="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/nytmovies.csv">List of NYT Movie Reviews</a>
+<a href="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/nytmovies.csv">List of NYT Movie Reviews links</a>
 
-## Part 3. NYT Sentiment Analysis
+## Part 3. NYT reviews and Sentiment Analysis
 
-For each URL pointing to an actual movie review, we then scraped the text of the review. Only the actual text of the review was considered. This was indicated by the class = 'story-body-text story-content' under the paragraph tag "< p >".  
+For each URL pointing to an actual movie review, we then scraped the text of the review. Only the actual text of the review was considered. This was indicated by the class = 'story-body-text story-content' under the paragraph tag "< p >".  In addition, we will retrieve the genre of the movie listed in the individual review.  The Genres are indicated by the following tag <span itemprop='genre' class='genre>.  We will only retrieve the first genre tag. 
 
 We then ran the review text through sentiment analysis with indico, again resulting in a 0-1 score.
 
+For reproducibility of results, we will read the reviews listing and review links from github.
 
 ```{r, eval = FALSE}
-# For each URl in combo
+# Retrieve list of movie from Github
+movie_list_url <- getURL("https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/nytmovies2.csv")
+movie_list <- read.csv(textConnection(movie_list_url), header = TRUE, sep = ",")
 
-library(RCurl)
-library(XML)
-library(indicoio)
+movie_list[1:5,]
+str(movie_list)
 
 
-movie_score <- data.frame()
+# initialize resulting data frame
+movie_score_nyt <- data.frame()
 
-for (i in 1:length(combo$url)){
-  movie_url <- combo$url[i] 
-  my_movie <- readLines(movie_url, encoding = "UTF-8")
-  content_review <- htmlTreeParse(my_movie, asText=TRUE, useInternalNodes = TRUE, encoding = 'UTF-8')
-  plain.text <- xpathSApply(xmlRoot(content_review), "//p[@class = 'story-body-text story-content']", xmlValue)
-  plain.text <- as.data.frame(as.character(paste(plain.text, collapse = " ")))
-  colnames(plain.text) <- "review"
-  plain.text$movie <- combo$display_title[i]
-  plain.text$Sentiment_score <- unlist(sentiment(as.character(rm_special(plain.text$review)),api_key = indico_api_key))
-  movie_score <- rbind(movie_score, plain.text)
+# initialize variables:
+
+# INDICO API Key 
+my_indicoio_API_Key <-"2cf9508e4628b67c9b69ae7d1059efda"
+
+# Set Up xpath to retrieve review and genre
+xpath_review <- "//p[@class = 'story-body-text story-content']"
+xpath_genre <- "(//span[@itemprop='genre'][@class = 'genre'])[1]" # will only retrieve first one
+
+agent <- c(R.version$version.string, ",", R.version$platform)
+
+# Loop through movie list, retrieve review for each movie review url
+loop_counter <- nrow(movie_list)
+
+for (i in 1:loop_counter){
+  
+  #Set RCurl pars
+  curl <- getCurlHandle()
+  curlSetOpt(cookiejar="cookies.txt",  useragent = agent, followlocation = TRUE, curl=curl)
+  
+  movie_url <-  movie_list$url[i]
+  
+  # Get Review corresponding the url
+  my_movie <- getURL(as.character(movie_url), curl = curl, verbose = FALSE)
+  
+  content_review = htmlTreeParse(my_movie, asText=TRUE, useInternalNodes = TRUE, encoding = 'UTF-8')
+  
+  plain_text <- xpathSApply(xmlRoot(content_review), xpath_review, xmlValue)
+  review_df <- as.data.frame(as.character(paste(plain_text, collapse = " ")))
+  
+  colnames(review_df) <- "review"
+  review_df$movie <- movie_list$movie[i]
+  
+  review_df$Sentiment_Score_nyt <- unlist(sentiment(as.character(review_df$review), api_key = my_indicoio_API_Key))
+  
+  genre <- xpathSApply(xmlRoot(content_review), xpath_genre, xmlValue)
+  review_df$genre <-genre
+  
+  movie_score <- rbind(movie_score, review_df)
 }
 
-combo <- cbind(combo, movie_score)
+movie_score_nyt <- inner_join(movie_list, movie_score, by = "movie")
+
+
+write.csv(movie_score_nyt, file = "movie_df.csv", sep = ",")
+
 ```
+
+The full dataframe for NYT movie reviews can be found on GitHub at:  
 
 
 ```{r, include= FALSE, eval=TRUE}
