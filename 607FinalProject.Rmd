@@ -294,6 +294,9 @@ Percentage of False Negative: `r scales::percent(nrow(nyt_false_negative)/nrow(m
 Percentage of True Positive:  `r scales::percent(nrow(nyt_true_positive)/nrow(movie_score_nyt))`   
 Percentage of True Negative:  `r scales::percent(nrow(nyt_true_negative)/nrow(movie_score_nyt))`   
 
+## NYT Sentiment Analysis Summary
+
+We created a summary table without the full review text for easier data analysis.
 
 ```{r, include= FALSE, eval=TRUE}
 url <- "https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/"
@@ -306,7 +309,7 @@ close(data.url)
 ```
 
 
-```{r, eval= TRUE}
+```{r, eval= TRUE, warning= FALSE}
 url <- "https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/"
 
 data.url <- file(paste(url,"movie_score_nyt.csv", sep = ""), open="r" )
@@ -315,7 +318,14 @@ reviewscore <- read.csv(data.url, sep=",", header=TRUE, stringsAsFactors = FALSE
 reviewscore<-reviewscore[,c(2:5,7:8,10:11)] #subset needed columns
 kable(reviewscore)
 close(data.url)
+
+write.csv(reviewscore, file = "sentimentsummarynyt.csv", sep = ",")
 ```
+
+The resulting CSV is available here:
+
+<a href="">NYT Sentiment Summary</a>
+
 
 ## Part 4. Twitter Sentiment Analysis
 
@@ -471,7 +481,7 @@ tweets1$movie[tweets1$movie == 'Mother<U+0092>s Day'] <- "Mother's Day"
 tweets1$movie[tweets1$movie == "L<U+0092>Attesa (The Wait)"] <- "L'Attesa (The Wait)"
 ```
 
-```{r, eval=TRUE}
+```{r, eval=TRUE, warning= FALSE}
 moviesum1<- ddply(tweets1, .(movie), summarize,  Sentiment_Score=mean(Sentiment_Score), Count_of_Tweets=length(tweet)) #summarize by movie
 
 moviesum1$movie<-as.character(moviesum1$movie) #convert levels to character
@@ -479,7 +489,13 @@ moviesum1<- arrange(moviesum1, movie) #sort alphabetically by movie name
 moviesum1$num<-seq.int(nrow(moviesum1)) # add counter row
 
 kable(moviesum1, row.names = TRUE)
+
+write.csv(moviesum1, file = "sentimentsummarytwitter.csv", sep = ",")
 ```
+
+The resulting CSV is available here:
+
+<a href="">Twitter Sentiment Summary</a>
 
 ## City Score
 
