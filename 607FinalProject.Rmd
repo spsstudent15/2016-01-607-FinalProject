@@ -16,15 +16,15 @@ output:
 We set out to compare 2016 New York Times movie reviews and tweets related to a given set of movies. 
 
 
-<center><img src="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/NYTLogo.jpg" width="500px" /></center>
+<center><img src="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/NYTLogo.jpg" height="250px" width="500px" /></center>
 
 <p>
 
-<center><img src="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/twitterlogo.jpg" width="500px" /></center>
+<center><img src="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/twitterlogo.jpg" height="250px" width="400px" /></center>
 
 <p>
 
-<center><img src="https://indico.io/static/img/logo-black.png" width="500px" /></center>
+<center><img src="https://indico.io/static/img/logo-black.png" height="250px" width="200px" /></center>
 
 <p>
 
@@ -70,6 +70,7 @@ library(stringr)
 library(tidyr)
 library(twitteR)
 library(XML)
+library(scales)
 
 ```
 
@@ -263,6 +264,9 @@ We will consider a "good" score any score >= 0,75 and would expect the movie to 
 We will take a look at Pick/Good (True Positive), Pick/Bad (False Negative), NotPick/Good (False Positive), NotPick/Bad (True Negative)
 
 ```{r, eval = TRUE}
+url <- "https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/"
+data.url <- file(paste(url,"movie_score_nyt.csv", sep = ""), open="r" )
+movie_score_nyt <- read.csv(data.url, sep=",", header=TRUE, stringsAsFactors = FALSE)
 
 nyt_false_positive <- movie_score_nyt %>% filter(Sentiment_Score_nyt < 0.75 & critics_pick == 1) %>% 
                     select(movie, mpaa_rating, genre, Sentiment_Score_nyt, critics_pick)
@@ -278,11 +282,10 @@ nyt_true_positive <- movie_score_nyt %>% filter(Sentiment_Score_nyt >= 0.75 & cr
 
 ```
 
-Percentage of False Positive: `r (nrow(nyt_false_positive)/nrow(movie_score_nyt) * 100)  
-Percentage of False Negative: `r (nrow(nyt_false_negative)/nrow(movie_score_nyt) * 100)
-Percentage of True Positive:  `r (nrow(nyt_true_positive)/nrow(movie_score_nyt) * 100)
-Percentage of True Negative:  `r (nrow(nyt_true_negative)/nrow(movie_score_nyt) * 100)   
-
+Percentage of False Positive: `r scales::percent(nrow(nyt_false_positive)/nrow(movie_score_nyt))`    
+Percentage of False Negative: `r scales::percent(nrow(nyt_false_negative)/nrow(movie_score_nyt))`   
+Percentage of True Positive:  `r scales::percent(nrow(nyt_true_positive)/nrow(movie_score_nyt))`   
+Percentage of True Negative:  `r scales::percent(nrow(nyt_true_negative)/nrow(movie_score_nyt))`   
 
 
 ```{r, include= FALSE, eval=TRUE}
@@ -584,15 +587,15 @@ We used the Indico Sentiment Analysis API to analyze our text to return the posi
 Collaborating on Slack
 
 
-Collaborating on Github 
+## Collaborating on Github 
+
+This was our first experience contributing to a repository using GitHub. It made sharing the code and version control of each change much easier than previous attempts. 
 
 # Challenges
 
-Choosing tweets
-
-Retweets and removing duplicates
-
 Movie titles with common words
+
+We encountered some issues with movies having one word titles that pulled lots of unrelated tweets. Our solution was to append `movies` to the search to try to narrow down results to just movies. One other issue is that a movie `Mother's Day` came out right before the actual Mother's Day holiday. Many people appeared to go to the movies on Mother's Day to celebrate but the actual movie they went to see may have been another one of the films. There are many nuances involved in pulling the tweets. 
 
 # Insights and Conclusion
 
