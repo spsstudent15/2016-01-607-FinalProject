@@ -46,7 +46,7 @@ We ran a sentiment analysis on the text of the tweets and the text of the movie 
 
 We created data frames for our data sources, cleaned and transformed the data, and performed analysis on the resulting datasets.
 
-<center><img src="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Diagram.PNG" height="800px" /></center>
+<center><img src="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/flowchart.png" height="800px" /></center>
 
 # Libraries
 
@@ -443,7 +443,7 @@ We created a main dataframe to include basic movie information, NYT Critics' Pic
 
 ## Movie Score
 
-We looked at the average Twitter Sentiment by movie.
+We looked at the average Twitter Sentiment by movie. This returned fewer movies than had New York Times reviews. More obscure or independent movies, or movies with limited releases, were less likely to have mentions on Twitter.
 
 ```{r, eval=TRUE, include=FALSE, warning=FALSE, message=FALSE}
 library(tidyr)
@@ -501,7 +501,7 @@ kable(moviecitysum1)
 
 ## NYT vs. Twitter
 
-The following box plot compares New York Times review sentiment score and Twitter average sentiment score for the top 10 movies. Six of the movies seem to have a similar score from both sources, while four of the movies do not.
+We compared New York Times review sentiment score and Twitter average sentiment score for the top 10 movies. Six of the movies seemed to have a similar score from both sources, while four of the movies did not.
 
 ```{r, eval=TRUE, warning=FALSE, message=FALSE, height=800, width = 600}
 library(plotly)
@@ -550,7 +550,7 @@ plot_ly(subset(tweets1, tweets1$movie %in% top_movies),
 
 ## Twitter Scores
 
-The following bar plots show average Twitter sentiment score by movie and by city.
+We looked at average Twitter sentiment score by movie and by city.
 
 ```{r, eval=TRUE}
 
@@ -569,7 +569,7 @@ ggplot(
   labs(x="City",y="Score")
 ```
 
-The following map shows average Twitter sentiment score by movie, for the top 10 movies. Larger circles indicate more positive sentiment. Different colors indicate different movies.
+We looked at average Twitter sentiment score by movie for the top 10 movies. Larger circles indicate more positive sentiment. Different colors indicate different movies.
 
 ```{r}
 library(RColorBrewer)
@@ -637,12 +637,14 @@ We encountered some issues with movies having one word titles that pulled lots o
 
 # Insights and Conclusion
 
+**Twitter Data Reliability**
+
 Twitter has a limitation on interpretability, it is useful as a proof of concept but cannot be the sole source of information. Many tweets were commerical advertisements and had unhelpful links. Twitter is a useful tool to explore but I would not build a data product exclusively with it. 
 
-Comparing NYT and Twitter Scores
+**Comparing NYT and Twitter Scores**
 
-Reliability of data
+**Outliers**
 
-Interpretation of results
+**Interpretation of results**
 
 
