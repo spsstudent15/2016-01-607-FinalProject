@@ -193,7 +193,7 @@ For each URL pointing to a movie review, we then scraped the text of the review.
 
 We then ran the review text through sentiment analysis with indico, resulting in a 0-1 score, with 1 being most positive.
 
-For reproducibility of results, we read the review list and URLs from github.
+For reproducibility of results, we read the review list and URLs from Github.
 
 ```{r, eval = FALSE}
 # Retrieve list of movie from Github
@@ -471,7 +471,7 @@ We combined all seven days of tweets into one dataframe of 5,445 records. This s
 
 ### Twitter Sentiment Summary
 
-We looked at the average Twitter Sentiment by movie. This returned fewer movies than had New York Times reviews. More obscure or independent movies, or movies with limited releases, were less likely to have mentions on Twitter.
+We looked at the average Twitter Sentiment by movie. 
 
 ```{r, eval=TRUE, include=FALSE, warning=FALSE, message=FALSE}
 library(tidyr)
@@ -575,7 +575,7 @@ The resulting CSV is available here:
 
 ## NYT vs. Twitter
 
-We compared New York Times review sentiment score and Twitter average sentiment score for the top 10 movies by tweet count. Six of the movies seemed to have a similar score from both sources, while four of the movies did not.
+We compared New York Times review sentiment score and Twitter average sentiment score for the top 10 movies by tweet count
 
 ```{r, eval=TRUE, warning=FALSE, message=FALSE, height=800, width = 600}
 library(plotly)
@@ -692,6 +692,10 @@ We used the Indico Sentiment Analysis API to analyze our text to return the posi
 
  > Indico Benchmark: The API performs with 93% accuracy on the IMDB dataset (state of the art).
 
+## Leaflet pakcage
+
+The Leaflet package was simple to use with our given list of locations with latitude and longitude. One drawback is the lack of a built-in zoom reset button. The popup option is a clean way to allow for label display without clutter.
+
 ## Collaborating on Slack
 
 We found Slack easy to use with a pleasant user interface and file sharing options. Slack may be more useful for larger groups. For our three-person group, we found that email was mostly manageable. Since we were already checking in on email, RPubs, and Github, Slack seemed like one more thing to check.
@@ -708,9 +712,15 @@ We encountered some issues with movies having one word titles that pulled lots o
 
 **Special characters and encoding**
 
+Movies with accents, such as foreign movies, and movies with apostrophes in the titles caused encoding issues which had to be resolved with character substitution. Several movies would have been unintentionally omitted from the analysis if we had not resolved these characters.
+
 **Indico limitations**
 
+Indico's free service allows 10,000 pulls. Each tweet is counted as one pull. For a project with a contained scope, this may be feasible. However, for long-term research studies, a paid account would be needed.
+
 **New York Times API data**
+
+The syntax documentation for the NYT API was easy to follow. However, the pulls seemed to omit some results. The API gave 20 results per pull, so the use of offset=20, offset=40 was required to retrieve subsequent reqsults. Despite the offset function, it was necessary to combine two weeks of pulls and eliminate duplicate records to get the full dataset for our desired date range.
 
 # Insights and Conclusion
 
@@ -719,6 +729,10 @@ We encountered some issues with movies having one word titles that pulled lots o
 Twitter has a limitation on interpretability, it is useful as a proof of concept but cannot be the sole source of information. Many tweets were commerical advertisements and had unhelpful links. Twitter is a useful tool to explore but I would not build a data product exclusively with it. 
 
 **Comparing NYT and Twitter Scores**
+
+In our box plot comparison of the top 10 movies by tweet count, 6 of 10 movies had similar sentiment scores across our two data sources. 
+
+The Twitter data captured only 34 of our 40 New York Times reviewed movies. More obscure or independent movies, or movies with limited releases, were less likely to have mentions on Twitter. The New York Times does more in-depth cultural and artistic analysis than Twitter.
 
 **Outliers**
 
