@@ -622,8 +622,11 @@ plot_ly(subset(tweets1, tweets1$movie %in% top_movies),
 <br><br><br><br><br><br><br><br>
 
 
+# Twitter Sentiment Score Confidence Interval
 
-```{r}
+The below graphs display the confidence intervals for each movie based on their twitter sentiment analysis scores. We can see that for 9 of the 10 movies the New York Times sentiment score falls outside of the range of confidence interval for each movie. Since we are 95% confident that the true mean of twitter sentiment is contained in this interval we can conclude that twitter sentiment scores are not similar to sentiment scores of the New York Times review. 
+
+```{r, height=800, width = 600}
 
 tweets <- merge(tweets1, movies_score_NYT_subset[2:4]) %>%
           rename(Twitter_score = Sentiment_Score, NYT_score = Sentiment_score) %>%
