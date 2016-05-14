@@ -53,7 +53,6 @@ We created data frames for our data sources, cleaned and transformed the data, a
 The following libraries were required.
 
 ```{r, Libraries1, eval=FALSE, warning=FALSE, message=FALSE}
-
 library(indicoio)
 ```
 
@@ -595,7 +594,7 @@ for (i in seq_len(nrow(movies_score_NYT_subset ))) {
   a[[i]] <- list(
   x = movies_score_NYT_subset$movie[i],
   y = movies_score_NYT_subset$Sentiment_score[i],
-  text = paste("NYT Score: ", signif(movies_score_NYT_subset$Sentiment_score[i],5)),
+  text = paste("NYT Score: <br>", signif(movies_score_NYT_subset$Sentiment_score[i],5)),
   xref = "x", yref = "y", showarrow = TRUE,  arrowhead = 7,  ax = 10,  ay = -20
   )
 }
@@ -605,7 +604,10 @@ m = list( l = 50,  r = 50,  b = 150,  t = 100,  pad = 5)
 xlabel <- list(title = "Movie")
 ylabel <- list(title = "Setiment Score")
 
-plot_ly(subset(tweets1, tweets1$movie %in% top_movies), 
+tweets1_subset <- subset(tweets1, tweets1$movie %in% top_movies) %>%
+                  arrange(movie)
+
+plot_ly(tweets1_subset, 
         y = Sentiment_Score, 
         color = movie, 
         type = "box", 
