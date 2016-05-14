@@ -622,6 +622,43 @@ plot_ly(subset(tweets1, tweets1$movie %in% top_movies),
 <br><br><br><br><br><br><br><br>
 
 
+
+```{r}
+
+tweets <- merge(tweets1, movies_score_NYT_subset[2:4]) %>%
+          rename(Twitter_score = Sentiment_Score, NYT_score = Sentiment_score) %>%
+          select(movie, Twitter_score, NYT_score)
+
+tweets_confidence <- NULL
+for (i in unique(tweets$movie)){
+  conf <- t.test(tweets$Twitter_score[tweets$movie == i], conf.level = .95)
+  results <- NULL
+  results$movie <- i
+  results$lower_conf <- conf$conf.int[1] 
+  results$upper_conf <- conf$conf.int[2]
+  tweets_confidence <- rbind(tweets_confidence, as.data.frame(results))
+}
+
+tweets <- merge(tweets, tweets_confidence)
+
+ggplot(tweets, aes(x=Twitter_score)) + 
+      geom_histogram(binwidth=.1, colour="black", fill="white") + 
+      theme_minimal() + 
+      facet_wrap(~movie) + 
+      xlab("Twitter Sentiment Score") +
+      ylab("Count") +
+      ggtitle("Confidence Intervals for Top 10 Twitter Movies and NYTimes Sentiment Score") + 
+      geom_vline(data=unique(tweets[c("movie","NYT_score")]), 
+                 aes(xintercept = NYT_score, color="NYT Sentiment Score"), linetype= 1, size=1) + 
+      geom_vline(data = tweets[c("movie", "lower_conf")], 
+                 aes(xintercept = lower_conf , color = "Lower Confidence Interval"), linetype="dashed", size=1) + 
+      geom_vline(data = tweets[c("movie", "upper_conf")], 
+                 aes(xintercept = upper_conf , color = "Upper Confidence Interval"), linetype="dashed", size=1) + 
+      scale_colour_manual(name="", values=c("NYT Sentiment Score" ="salmon", 
+                                                      "Lower Confidence Interval" = "darkolivegreen2",
+                                                      "Upper Confidence Interval" = "lightskyblue3")) 
+```
+
 ## Twitter Scores
 
 We looked at average Twitter sentiment score by movie and by city.
@@ -650,7 +687,10 @@ library(RColorBrewer)
 
 mapped_tweets <- merge(tweets1, locations, all.x = TRUE, by.y = "City", by.x = "city")  %>%
                 group_by(movie, city, Long, Lat) %>%
-                summarise( score = mean(Sentiment_Score))
+                summarise(avg_twitter_score = mean(Sentiment_Score)) %>%
+                merge(movies_score_NYT[,c("movie", "Sentiment_score")], all.x = TRUE, by = "movie") %>%
+                rename(NYT_sentiment_score = Sentiment_score)
+
 
 mapped_tweets_top <- subset(mapped_tweets, mapped_tweets$movie %in% top_movies)
 
@@ -659,14 +699,14 @@ factpal <- colorFactor(brewer.pal(10, "Spectral"), mapped_tweets_top$movie)
 leaflet(mapped_tweets_top) %>% 
   addProviderTiles("Stamen.Toner") %>%
   addCircles(lng = ~jitter(Long, factor = 20), lat = ~jitter(Lat, factor = 20), weight = 2,
-    radius = ~score*100000, 
+    radius = ~avg_twitter_score*100000, 
     popup =paste("<font color=", factpal(mapped_tweets_top$movie), ">" , 
-                 "Movie:", as.character(mapped_tweets_top$movie), "<br>", "Sentiment Score:", 
-                           as.character(signif(mapped_tweets_top$score,3)), "</font>"),
+                 "Movie:", as.character(mapped_tweets_top$movie), "<br>", 
+                 "Avg Twitter Sentiment Score:", as.character(signif(mapped_tweets_top$avg_twitter_score,3)),"<br>", 
+                 "NYT Sentiment Score:", as.character(signif(mapped_tweets_top$NYT_sentiment_score,3)), 
+                 "</font>"),
     color = ~factpal(mapped_tweets_top$movie),
     fillOpacity = 0.4)
-
-
 ```
 
 <br>
