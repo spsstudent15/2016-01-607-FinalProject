@@ -442,8 +442,7 @@ nytsent<-getURL("https://raw.githubusercontent.com/spsstudent15/Data607FinalProj
 df<- data.frame(read.csv(text=nytsent))
 
 datanyt<-df[,c(3:4,7:9)]
-datanyt$Sentiment_Score_nyt=round(datanyt$Sentiment_Score_nyt,2)
-#data$Sentiment_Score=round(data$Sentiment_Score,2)
+datanyt$Sentiment_Score_nyt=round(datanyt$Sentiment_Score_nyt,3) #round decimals to 3 places
 
 datatable(datanyt, options = list(columnDefs = list(list(className = 'dt-center', targets = 5)), pageLength = 5, lengthMenu = c(5, 10, 40)), rownames= TRUE)
 ```
@@ -516,9 +515,9 @@ twittersent<-getURL("https://raw.githubusercontent.com/spsstudent15/Data607Final
 df<- data.frame(read.csv(text=twittersent))
 
 datatw<-df[,c(2:4)]
-datatw$Sentiment_Score=round(datatw$Sentiment_Score,2)
+datatw$Sentiment_Score=round(datatw$Sentiment_Score,3) #round decimals to 3 places
 
-datatable(datatw, options = list(columnDefs = list(list(className = 'dt-center', targets = 5)), pageLength = 5, lengthMenu = c(5, 10, 40)), rownames= TRUE)
+datatable(datatw, options = list(columnDefs = list(list(className = 'dt-center', targets = 3)), pageLength = 5, lengthMenu = c(5, 10, 40)), rownames= TRUE) #create data table for display
 ```
 
 
@@ -560,6 +559,14 @@ names(datacombo)<-c("Movie","NYT_Sentiment","Twitter_Sentiment","NYT_CriticsPick
 datatable(datacombo, options = list(columnDefs = list(list(className = 'dt-center', targets = 5)), pageLength = 40, lengthMenu = c(5, 10, 40)), rownames= TRUE)
 
 ```
+
+```{r, eval= FALSE}
+write.csv(datacombo, file = "sentimentsummarycombo.csv", sep = ",")
+```
+
+The resulting CSV is available here:
+
+<a href="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/">Comparison Summary</a>
 
 
 # Visualization
