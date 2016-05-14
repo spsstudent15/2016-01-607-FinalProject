@@ -568,7 +568,7 @@ write.csv(datacombo, file = "sentimentsummarycombo.csv", sep = ",")
 
 The resulting CSV is available here:
 
-<a href="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/sentimentsummarycombo.csv/">Comparison Summary</a>
+<a href="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/sentimentsummarycombo.csv">Comparison Summary</a>
 
 
 # Visualization
