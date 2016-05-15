@@ -399,10 +399,10 @@ url <- "https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/maste
 data.url <- file(paste(url,"movie_score_nyt.csv", sep = ""), open="r" )
 movie_score_nyt <- read.csv(data.url, sep=",", header=TRUE, stringsAsFactors = FALSE)
 
-nyt_false_positive <- movie_score_nyt %>% filter(Sentiment_Score_nyt < 0.75 & critics_pick == 1) %>% 
+nyt_false_negative <- movie_score_nyt %>% filter(Sentiment_Score_nyt < 0.75 & critics_pick == 1) %>% 
                     select(movie, mpaa_rating, genre, Sentiment_Score_nyt, critics_pick)
 
-nyt_false_negative <- movie_score_nyt %>% filter(Sentiment_Score_nyt >= 0.75 & critics_pick == 0) %>% 
+nyt_false_positive <- movie_score_nyt %>% filter(Sentiment_Score_nyt >= 0.75 & critics_pick == 0) %>% 
                      select(movie, mpaa_rating, genre, Sentiment_Score_nyt, critics_pick)
  
 nyt_true_negative <- movie_score_nyt %>% filter(Sentiment_Score_nyt < 0.75 & critics_pick == 0) %>% 
@@ -419,6 +419,44 @@ Percentage of False Positive: `r scales::percent(nrow(nyt_false_positive)/nrow(m
 Percentage of False Negative: `r scales::percent(nrow(nyt_false_negative)/nrow(movie_score_nyt))`   
 Percentage of True Positive:  `r scales::percent(nrow(nyt_true_positive)/nrow(movie_score_nyt))`   
 Percentage of True Negative:  `r scales::percent(nrow(nyt_true_negative)/nrow(movie_score_nyt))`   
+
+The question when conducting sentiment analysis is how confident are we on the results.  Based on this quick analysis, we can see that the sentiment analysis score does not always matched with whether the movie was recommended.  
+
+We number of false negative are really indicators of how difficult it is to accurately measure the tonality and sentiment in a document.  There are two movies that fell into the category of false negative.  The movies were recommended by the NY Times critic however the sentiment analysis score was less than the threshold we considered.  Upon reading the reviews, for these movies "Viva" and "A Hologram for a King", it is understandable that the results of the Sentiment Analysis are as they are.  Both movies are dramas with elements of the review depicting difficult, dark, and negative terms.  
+
+The False positive results are more easily explained, the NY Times can give neutral to positive review without recommending the movies.  Also, score of 0.75 may be too low a limit to be expected to recommendation.  We will therefore consider score below .50 as negative, score between .50 and .80 as neutral and above .80 as positive.  
+
+We will rerun the analysis based on these new limits.  False negative will be scores < .50 but with recommendation, False positive will be scores >= 80 without recommendation, and False neutral will be scores within interval [50;80) with recommendation;  
+
+```{r, eval = TRUE}
+nyt_false_negative <- movie_score_nyt %>% filter(Sentiment_Score_nyt < 0.50 & critics_pick == 1) %>% 
+                    select(movie, mpaa_rating, genre, Sentiment_Score_nyt, critics_pick)
+
+nyt_false_positive <- movie_score_nyt %>% filter(Sentiment_Score_nyt >= 0.80 & critics_pick == 0) %>% 
+                     select(movie, mpaa_rating, genre, Sentiment_Score_nyt, critics_pick)
+ 
+nyt_true_negative <- movie_score_nyt %>% filter(Sentiment_Score_nyt < 0.50 & critics_pick == 0) %>% 
+                     select(movie, mpaa_rating, genre, Sentiment_Score_nyt, critics_pick)
+
+nyt_true_positive <- movie_score_nyt %>% filter(Sentiment_Score_nyt >= 0.80 & critics_pick == 1) %>% 
+                      select(movie, mpaa_rating, genre, Sentiment_Score_nyt, critics_pick)
+
+nyt_false_neutral <-  movie_score_nyt %>% filter(Sentiment_Score_nyt >= 0.50 & Sentiment_Score_nyt < 0.80 
+                                                                            & critics_pick == 1) %>% 
+                     select(movie, mpaa_rating, genre, Sentiment_Score_nyt, critics_pick)
+
+nyt_true_neutral <-  movie_score_nyt %>% filter(Sentiment_Score_nyt >= 0.50 & Sentiment_Score_nyt < 0.80 
+                                                                            & critics_pick == 0) %>% 
+                     select(movie, mpaa_rating, genre, Sentiment_Score_nyt, critics_pick)
+```
+
+Percentage of False Positive: `r scales::percent(nrow(nyt_false_positive)/nrow(movie_score_nyt))`    
+Percentage of False Negative: `r scales::percent(nrow(nyt_false_negative)/nrow(movie_score_nyt))`   
+Percentage of False Neutral : `r scales::percent(nrow(nyt_false_neutral)/nrow(movie_score_nyt))`   
+Percentage of True Positive : `r scales::percent(nrow(nyt_true_positive)/nrow(movie_score_nyt))`   
+Percentage of True Neutral  : `r scales::percent(nrow(nyt_true_neutral)/nrow(movie_score_nyt))`
+Percentage of True Negative : `r scales::percent(nrow(nyt_true_negative)/nrow(movie_score_nyt))`   
+
 
 ### New York Times Sentiment Summary
 
@@ -717,6 +755,173 @@ leaflet(mapped_tweets_top) %>%
 
 <br>
 <br>
+---
+## Statistical Analysis  
+
+One of the question that we would like answer is how relevant is the NY Times review as a predictor of the Sentiment Analysis for the tweets.  In order to attempt to answer this question will will compare the NY Times score against the averate of the sentiments analysis for each movie.
+
+### Data Set  
+
+For this analysis, we will consider the average of the sentiment analysis for tweets and the NY Times sentiment analsyis.  However, we will filter it to consider only movies for which we have at least 15 tweets.  
+
+```{r, eval = TRUE}
+####################################################################
+# Build Data Set for Analysis
+####################################################################
+
+# Merge the 2 streams
+
+tweets_url <- getURL("https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/tweets503to509.csv")
+tweets_list <- read.csv(text = tweets_url, header = TRUE, sep = ",")
+
+#movie_score_nyt <- read.csv("movie_score_nyt.csv", header = TRUE, sep = ",")
+
+nyt_url <- getURL("https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/sentimentsummarynyt.csv")
+movie_score_nyt <- read.csv(text = nyt_url, header = TRUE, sep = ",")
+
+str(movie_score_nyt)
+str(tweets_list)
+
+my_data_raw <- inner_join(tweets_list, movie_score_nyt, by = "movie")
+
+###################################################################
+# Transform data
+###################################################################
+# Fix Los Angeles
+
+my_data_raw$city[my_data_raw$city == 'los Angeles'] <- 'Los Angeles'
+
+###################################################################
+# Select/Filter/Arrange Data
+
+### Selecting columns
+
+my_data_analysis <- select (my_data_raw, movie, day, opening_date, publication_date, 
+                            mpaa_rating, genre, critics_pick, city, Sentiment_Score, Sentiment_Score_nyt)
+
+
+#### Filter out any rows where count < 15
+
+data_movie <- my_data_analysis %>% group_by (movie) %>% summarise (count=n())
+
+data_movie_15 <- data_movie %>% filter(count>= 15) %>% select(movie, count)
+data_movie_15 <- arrange(data_movie_15, desc(count), movie)
+
+mydf15 <- inner_join(data_movie_15, my_data_analysis)
+
+mydf15 <- arrange(mydf15, desc(count), movie, Sentiment_Score)
+
+###################################################################
+# Tweet Sentiment Analysis Confidence Interval
+##################################################################
+movies <- unique(mydf15$movie)
+n_movie <- length(movies)
+
+# initial storage variables
+movie_mean <- rep(NA, n_movie)
+
+movie_cis <- matrix(nrow = n_movie,ncol = 2)
+
+for (i in 1:n_movie){
+  
+  # Extract Data for caluclation
+  rows <- which(mydf15$movie == movies[i])
+  
+  observations <- mydf15$Sentiment_Score[rows]
+  
+  # Store mean for Sentiment Analysis
+  movie_mean[i] <- mean(observations)
+  
+  movie_sd <- sd(observations)
+  n <- length(observations)
+  
+  movie_ster <- movie_sd / sqrt(n)
+  
+  # Calculate CIs
+  # We will use 2 (instead of 1.96 for 95% interval since we do not know distribution)
+  
+  movie_cis[i,1] <- movie_mean[i] - 2 * movie_ster
+  movie_cis[i,2] <- movie_mean[i] + 2 * movie_ster
+}
+
+movie_mean_df <- bind_cols(data_movie_15,as.data.frame(movie_mean))
+
+movie_analysis <- inner_join(movie_mean_df, movie_score_nyt)
+movie_analysis <- select(movie_analysis, movie, count, movie_mean, mpaa_rating, critics_pick, Sentiment_Score_nyt, genre)
+movie_analysis <- arrange(movie_analysis, desc(count), movie)
+
+#############################################################
+
+
+```
+
+### Statistical Analysis
+
+We will consider the NY Times Review Score and the average Sentiment Analyis score of the tweets for a given movie.  both these variables are numerical in nature.  we will first plot them.  
+
+
+```{r, eval = TRUE}
+ggplot(movie_analysis, aes(x=Sentiment_Score_nyt, y=movie_mean )) + geom_point()
+```
+
+From the scatter plot, it is does not seem probable that there is relation between these two variables.  We will now fit a line through the graph and calculate the linear regression.
+
+```{r, eval = TRUE}
+ggplot(movie_analysis, aes(x=Sentiment_Score_nyt, y=movie_mean )) + geom_point() + stat_smooth(method = lm)
+m1 <- lm(movie_mean ~ Sentiment_Score_nyt, data = movie_analysis)
+
+summary(m1)
+
+```
+
+Frome these results, it does not appear that there is relation between the two variables.  
+
+To have a better picture of the variations between the average of the tweets sentiment analysis and the NY Times review score will plot the confidence interval (95%) for the tweets for each movie concurrently and compare.  We will also place on the graph the NY Times review score. 
+
+```{r, eval = TRUE}
+# Building Confidence Interval Grapth in ggplot layer by layer
+# base plot; each point is a tweet, graded for transparency (alpha setting)
+p <- ggplot(mydf15, aes(x=reorder(movie, -count), y=jitter(Sentiment_Score, .4))) + geom_point(colour = "darkgrey", size = 3, alpha=.1)
+
+# Added segment for Confidence Interval
+p <- p + annotate("segment", x = movies, xend=movies, y=movie_cis[,1], yend = movie_cis[,2], colour = "blue", size = 2)
+
+# Added mean for tweets and NYT score (color coded for critics_pick)
+p <- p + geom_point(data=movie_mean_df, mapping=aes(y=movie_mean, colour = "red",  size = 4))
+p <- p + geom_point(data=mydf15, mapping=aes( y=Sentiment_Score_nyt, colour = as.factor(critics_pick), size = 4))
+
+# change text for axis labels
+p <- p + xlab("Movies") + ylab("Tweets Sentiment Analysis Score")
+
+# change apperance of text for axis label
+p <- p + theme (axis.title.x = element_text(face="italic", colour = "darkblue", size = 14), axis.title.y = element_text(face="italic", colour = "darkblue", size = 14))
+
+# change appearance of text for x-axis tick text
+p <- p + theme (axis.text.x = element_text(size = 10, angle = 45, hjust = 1, vjust = 1))
+
+# Added title for graph and add text formatting with theme element
+p <- p + ggtitle("Tweets Sentiment Analysis Confidence Intervals") + theme(plot.title = element_text(vjust = 3, colour = "darkblue", face = "bold",  size = 14))
+
+# Format Legends
+# Remove Legends for size
+p <- p + guides(size = FALSE)
+
+# Format Legend box for Points
+p <- p + labs(colour = "Points") + guides(colour = guide_legend (reverse = TRUE)) + scale_colour_discrete(labels=c("NYT score not picked", "NYT Score picked", "mean(Tweet Scores)"))
+
+p
+
+```
+
+The movie are sorted by number of overall tweets in descending order.  
+
+From this graph, we have only one movie for whom the NY Times score falls into the confidence interval around the average of the tweets: "Viva", we will recall that this is the movie that is a NY Critics' Pick that had a poor result on the sentiment analysis of the review.  
+
+We can conclude that there is no correlation between the NY Times review and the average sentiment analysis about a given movie.  
+
+---
+<br>
+<br>
 
 # New Features
 
@@ -738,7 +943,7 @@ We used the Indico Sentiment Analysis API to analyze our text to return the posi
 
  > Indico Benchmark: The API performs with 93% accuracy on the IMDB dataset (state of the art).
 
-## Leaflet pakcage
+## Leaflet package
 
 The Leaflet package was simple to use with our given list of locations with latitude and longitude. One drawback is the lack of a built-in zoom reset button. The popup option is a clean way to allow for label display without clutter.
 
@@ -748,7 +953,7 @@ We found Slack easy to use with a pleasant user interface and file sharing optio
 
 ## Collaborating on Github 
 
-This was our first experience contributing to a repository using GitHub. It made sharing the code and version control of each change much easier than previous attempts. 
+This was our first experience contributing to a repository using GitHub. It made sharing the code and version control of each change much easier than previous attempts. Github versioning control is powerful and can handle most merge seamlessly.  However if there is a conflic that Github cannot handle, the resolution must be handle through git command line and can be challenging.  
 
 # Challenges
 
@@ -759,6 +964,10 @@ We encountered some issues with movies having one word titles that pulled lots o
 **Special characters and encoding**
 
 Movies with accents, such as foreign movies, and movies with apostrophes in the titles caused encoding issues which had to be resolved with character substitution. Several movies would have been unintentionally omitted from the analysis if we had not resolved these characters.
+
+**Twitter limitations**
+
+Twitter free service for directed search limits the number of tweets to the last 5000.  We had to revise our approach and coordinate the timing of the NY Times reviews with when we were pulling tweets to have any hope of having relevant data. 
 
 **Indico limitations**
 
@@ -772,7 +981,7 @@ The syntax documentation for the NYT API was easy to follow. However, the pulls 
 
 **Twitter Data Reliability**
 
-Twitter has a limitation on interpretability, it is useful as a proof of concept but cannot be the sole source of information. Many tweets were commerical advertisements and had unhelpful links. Twitter is a useful tool to explore but I would not build a data product exclusively with it. 
+Twitter has a limitation on interpretability, it is useful as a proof of concept but cannot be the sole source of information. Many tweets were commercial advertisements and had unhelpful links. Twitter is a useful tool to explore but I would not build a data product exclusively with it. Unless the search criteria can be narrowed to specific key words, we run the risk of pulling tweets that are not related to the indended search.  The nature of tweets (shorter messages) makes it difficult to filter unwanted results.
 
 **Comparing NYT and Twitter Scores**
 
