@@ -28,9 +28,11 @@ We set out to compare 2016 New York Times movie reviews and tweets related to a 
 
 <p>
 
-We envisioned a sentiment analysis comparison of the two data sources. How favorably did the New York Times review a given movie compared to the average sentiment on Twitter?
+Our primary motivation was to explore disparate data sources that we had not encountered before that are also often used in data science, specifically Twitter and sentiment analysis. 
 
-What could this information show us? How could the resulting analysis be helpful to moviegoers and the movie industry?
+We envisioned a sentiment analysis comparison of the New York Times movie reviews and Tweets of the same movies. Our hope is that we would be able to answer how favorably did the New York Times review a given movie compared to the average sentiment on Twitter. 
+
+Hopefully, this approach will give us insight on market research analysis on social media and traditional media sources. Our resulting analysis should be helpful to moviegoers and the movie industry in understanding the perception of reviews.  
 
 # Data Science Workflow
 
@@ -122,7 +124,6 @@ setup_twitter_oauth(consumer_key,
                     access_secret)
 ```
 
-
 ## Part 2. NYT Movie Review API
 
 We registered for a New York Times Movie API key to pull the movie review data.
@@ -143,7 +144,7 @@ NYTREVIEWS_JSON_URL1 = paste0('http://api.nytimes.com/svc/movies/v2/reviews/sear
 json_file1 <- fromJSON(URLencode(NYTREVIEWS_JSON_URL1))# get json
 df1 <- as.data.frame(json_file1$results) #dataframe for results
 #str(df1) #view structure 
-#colnames(df1) #view column names
+#colnames(df1) #view column names 
 df1s<-df1[,c(1:8)] #subset needed columns
 #kable(df1s) #test
 
@@ -823,7 +824,7 @@ Frome these results, it did not appear that there was a relationship between the
 
 To get a better picture of the variations between the average of the Twitter sentiment analysis and the New York Times review score, we plotted the confidence interval (95%) for the tweets for all movies concurrently. We also plotted the NY Times review score.
 
-```{r, eval = TRUE}
+```{r, eval = TRUE, warning=FALSE, message=FALSE, fig.width=10, fig.height=8}
 # Building Confidence Interval Grapth in ggplot layer by layer
 # base plot; each point is a tweet, graded for transparency (alpha setting)
 p <- ggplot(mydf15, aes(x=reorder(movie, -count), y=jitter(Sentiment_Score, .4))) + geom_point(colour = "darkgrey", size = 3, alpha=.1)
@@ -918,7 +919,7 @@ leaflet(mapped_tweets_top) %>%
 
 # New Features
 
-## Twitter API / OAUTH
+## Twitter API / OAuth
 
 We utilized the Twitter API to develop our collection of tweets. Using the `twitteR` package we were able to pull tweets for locations by setting the geocode location and radius. OAuth was necessary because the `twitteR` uses the Developer API to search tweets based on our settings, it also required interaction by allowing the application access by putting in a key given by Twitter. 
 
@@ -950,13 +951,13 @@ This was our first experience contributing to a repository using GitHub. It made
 
 # Challenges
 
-**Movie titles with common words**
-
-We encountered some issues with movies having one word titles that pulled lots of unrelated tweets. Our solution was to append `movies` to the search to try to narrow down results to just movies. One other issue is that a movie `Mother's Day` came out right before the actual Mother's Day holiday. Many people appeared to go to the movies on Mother's Day to celebrate but the actual movie they went to see may have been another one of the films. There are many nuances involved in pulling the tweets. 
-
 **Special characters and encoding**
 
 Movies with accents, such as foreign movies, and movies with apostrophes in the titles caused encoding issues which had to be resolved with character substitution. Several movies would have been unintentionally omitted from the analysis if we had not resolved these characters.
+
+**Scope Limitations - Further Research**
+
+We had hoped that we could do an analysis including genre of movies but we had to reduce this portion of the scope to meet the deadline of the project. If we had more time and data points we would have wished to spend more time exploring other possible corelations, including a time series analysis.  
 
 **Twitter limitations**
 
@@ -980,10 +981,24 @@ Twitter has a limitation on interpretability, it is useful as a proof of concept
 
 In our box plot comparison of the top 10 movies by tweet count, 6 of 10 movies had similar sentiment scores across our two data sources. 
 
-The Twitter data captured only 34 of our 40 New York Times reviewed movies. More obscure or independent movies, or movies with limited releases, were less likely to have mentions on Twitter. The New York Times does more in-depth cultural and artistic analysis than Twitter.
-
 **Outliers**
 
-**Interpretation of results**
+The Twitter data captured only 34 of our 40 New York Times reviewed movies. More obscure or independent movies, or movies with limited releases, were less likely to have mentions on Twitter. The New York Times does more in-depth cultural and artistic analysis than Twitter. 
 
+Lincoln, Nebraska had very few data points and skewed much of the results in that city. Also, a few movies had very few tweets and skewed the results of the movie score and we dropped in certain results. 
+
+**Noisy Data**
+
+We encountered some issues with movies having one word titles that pulled lots of unrelated tweets. Our solution was to append `movies` to the search to try to narrow down results to just movies. One other issue is that a movie `Mother's Day` came out right before the actual Mother's Day holiday. Many people appeared to go to the movies on Mother's Day to celebrate but the actual movie they went to see may have been another one of the films. There are many nuances involved in pulling the tweets. 
+
+**Interpretation of results and further research needed**
+
+The results indicate that the New York Times does not reflect the tweet scores which we used as a proxy indicator of public opinion of the movies. Further research is needed to stratify the tweets because several movies are intended for different demographics and a more focused approach may yield different results. One of the challenges of this type of analysis was our inability to understand if we had an overlap in people reading the New York Times and then tweeting about the film. An experiment would needed to be conducted to be able to conclude a causal relationship between traditional media sources influencing new social media sources. 
+
+
+# Appendix A 
+
+Detailed Approach 
+
+![](https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/cuny607.PNG)
 
