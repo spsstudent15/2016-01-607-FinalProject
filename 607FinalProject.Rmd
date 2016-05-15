@@ -30,9 +30,9 @@ We set out to compare 2016 New York Times movie reviews and tweets related to a 
 
 Our primary motivation was to explore disparate data sources that we had not encountered before that are also often used in data science, specifically Twitter and sentiment analysis. 
 
-We envisioned a sentiment analysis comparison of the New York Times movie reviews and Tweets of the same movies. Our hope is that we would be able to answer how favorably did the New York Times review a given movie compared to the average sentiment on Twitter. 
+We envisioned a sentiment analysis comparison of the New York Times movie reviews and Tweets of the same movies. We hoped to be able to answer how favorably the New York Times reviewed a given movie compared to the average sentiment on Twitter. 
 
-Hopefully, this approach will give us insight on market research analysis on social media and traditional media sources. Our resulting analysis should be helpful to moviegoers and the movie industry in understanding the perception of reviews.  
+Our goal was to gain insight on market research analysis on social media and traditional media sources. We wanted our resulting analysis to be helpful to moviegoers and the movie industry in understanding the perception of reviews.  
 
 # Data Science Workflow
 
@@ -193,7 +193,7 @@ For each URL pointing to a movie review, we then scraped the text of the review.
 
 We then ran the review text through sentiment analysis with indico, resulting in a 0-1 score, with 1 being most positive.
 
-For reproducibility of results, we read the review list and URLs from Github.
+For reproducibility of results, we read the review list and URLs from GitHub.
 
 ```{r, eval = FALSE}
 # Retrieve list of movie from Github
@@ -946,17 +946,17 @@ The Leaflet package was simple to use with our given list of locations with lati
 
 ## Collaborating on Slack
 
-We found Slack easy to use with a pleasant user interface and file sharing options. Slack may be more useful for larger groups. For our three-person group, we found that email was mostly manageable. Since we were already checking in on email, RPubs, and Github, Slack seemed like one more thing to check.
+We found Slack easy to use with a pleasant user interface and file sharing options. Slack may be more useful for larger groups. For our three-person group, we found that email was mostly manageable. Since we were already checking in on email, RPubs, and GitHub, Slack seemed like one more thing to check.
 
-## Collaborating on Github 
+## Collaborating on GitHub 
 
-This was our first experience contributing to a repository using GitHub. It made sharing the code and version control of each change much easier than previous attempts. Github versioning control is powerful and can handle most merges seamlessly.  However if there is a conflict that Github cannot handle, the resolution must be handled through the Git command line and can be challenging.  
+This was our first experience contributing to a repository using GitHub. It made sharing the code and version control of each change much easier than previous attempts. GitHub versioning control is powerful and can handle most merges seamlessly. However, if there is a conflict that GitHub cannot handle, the resolution must be handled through the Git command line and can be challenging.  
 
 # Challenges
 
 **Special characters and encoding**
 
-Movies with accents, such as foreign movies, and movies with apostrophes in the titles caused encoding issues which had to be resolved with character substitution. Several movies would have been unintentionally omitted from the analysis if we had not resolved these characters.
+Movie titles with accents, such as foreign movies, and movies with apostrophes in the titles caused encoding issues which had to be resolved with character substitution. Several movies would have been unintentionally omitted from the analysis if we had not resolved these characters.
 
 **Scope Limitations - Further Research**
 
@@ -964,7 +964,7 @@ We had hoped that we could do an analysis including genre of movies but we had t
 
 **Twitter limitations**
 
-Twitter free service for directed search limited the number of tweets to the last 5000. We had to revise our approach and coordinate the timing of the NY Times reviews with when we were pulling tweets to have any hope of having relevant data. 
+Twitter's free service for a directed search limited the number of tweets to the last 5000. We had to revise our approach and coordinate the timing of the New York Times reviews with when we were pulling tweets to have any hope of retrieving relevant data. 
 
 **Indico limitations**
 
@@ -972,13 +972,13 @@ Indico's free service allows 10,000 pulls. Each tweet is counted as one pull. Fo
 
 **New York Times API data**
 
-The syntax documentation for the NYT API was easy to follow. However, the pulls seemed to omit some results. The API gave 20 results per pull, so the use of offset=20, offset=40 was required to retrieve subsequent reqsults. Despite the offset function, it was necessary to combine two weeks of pulls and eliminate duplicate records to get the full dataset for our desired date range.
+The syntax documentation for the New York Times API was easy to follow. However, the pulls seemed to omit some results. The API gave 20 results per pull, so the use of offsets was required to retrieve subsequent reqsults. Despite the offset function, it was necessary to combine two weeks of pulls and eliminate duplicate records to get the full dataset for our desired date range.
 
 # Insights and Conclusion
 
 **Twitter Data Reliability**
 
-Twitter has a limitation on interpretability, it is useful as a proof of concept but cannot be the sole source of information. Many tweets were commercial advertisements and had unhelpful links. Twitter is a useful tool to explore but we would not build a data product exclusively with it. Unless the search criteria can be narrowed to specific key words, we run the risk of pulling tweets that are not related to the indended search.  The nature of tweets (shorter messages) makes it difficult to filter unwanted results.
+Twitter has a limitation on interpretability. It is useful as a proof of concept but cannot be the sole source of information. Many tweets were commercial advertisements and had unhelpful links. Twitter is a useful tool to explore but we would not build a data product exclusively with it. Unless the search criteria can be narrowed to specific key words, we run the risk of pulling tweets that are not related to the indended search. The nature of tweets (shorter messages) makes it difficult to filter unwanted results.
 
 **Outliers**
 
@@ -988,15 +988,15 @@ Lincoln, Nebraska had very few data points and skewed much of the results in tha
 
 **Noisy Data**
 
-We encountered some issues with movies having one word titles that pulled lots of unrelated tweets. Our solution was to append `movies` to the search to try to narrow down results to just movies. One other issue is that a movie `Mother's Day` came out right before the actual Mother's Day holiday. Many people appeared to go to the movies on Mother's Day to celebrate but the actual movie they went to see may have been another one of the films. There are many nuances involved in pulling the tweets. 
+We encountered some issues with movies having one word titles that pulled lots of unrelated tweets. Our solution was to append `movies` to the search to try to narrow down results to just movies. One other issue was that a movie `Mother's Day` came out right before the actual Mother's Day holiday. Many people appeared to go to the movies on Mother's Day to celebrate but the actual movie they went to see may have been another one of the films. There were many nuances involved in pulling the tweets. 
 
 **Interpretation of results and further research needed**
 
-The results indicated that the New York Times does not reflect the tweet scores which we used as a proxy indicator of public opinion of the movies. 
+The results indicated that the New York Times did not reflect the tweet scores which we used as a proxy indicator of public opinion of the movies. 
 
-Further research is needed to stratify the tweets because several movies are intended for different demographics and a more focused approach may yield different results. 
+Further research is needed to stratify the tweets because several movies are intended for different demographics and a more focused approach may yield different results.
 
-One of the challenges of this type of analysis was our inability to understand if we had an overlap in people reading the New York Times and then tweeting about the film. An experiment would needed to be conducted to be able to conclude a causal relationship between traditional media sources influencing new social media sources. 
+One of the challenges of this type of analysis was our inability to understand if we had an overlap in people reading the New York Times and then tweeting about the film. An experiment would be needed to conclude a causal relationship between traditional media sources influencing new social media sources. 
 
 
 # Appendix
