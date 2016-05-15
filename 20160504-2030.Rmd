@@ -1,0 +1,995 @@
+---
+title: "Data 607 Final Project: Movie Review Sentiment Analysis"
+author: Valerie Briot, Christophe Hunt, Armenoush Aslanian-Persico
+date: May 2016
+output: 
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    code_folding: hide
+    theme: spacelab
+---
+
+# Introduction and Motivation
+
+We set out to compare 2016 New York Times movie reviews and tweets related to a given set of movies. 
+
+
+<center><img src="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/NYTLogo.jpg" height="250px" width="500px" /></center>
+
+<p>
+
+<center><img src="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/twitterlogo.jpg" height="250px" width="400px" /></center>
+
+<p>
+
+<center><img src="https://indico.io/static/img/logo-black.png" height="250px" width="200px" /></center>
+
+<p>
+
+We envisioned a sentiment analysis comparison of the two data sources. How favorably did the New York Times review a given movie compared to the average sentiment on Twitter?
+
+What could this information show us? How could the resulting analysis be helpful to moviegoers and the movie industry?
+
+# Data Science Workflow
+
+We began by identifying our project goals and scope, assessing potential data sources, and retrieving the data.
+
+We first performed an API pull of a list of recent New York Times movie reviews. 
+
+We then performed an API pull of recent tweets. We learned that Twitter provides only a limited search history for publicly available tweets. This resulted in an adjustment of our project scope. 
+
+We then adjusted the date range of our New York Times movie list to contain only the movies with available Twitter data.
+
+We ran a sentiment analysis on the text of the tweets and the text of the movie reviews for the given set of movies.
+
+We created data frames for our data sources, cleaned and transformed the data, and performed analysis on the resulting datasets.
+
+<center><img src="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/flowchart.png" height="800px" /></center>
+
+# Libraries
+
+The following libraries were required.
+
+```{r, Libraries1, eval=FALSE, warning=FALSE, message=FALSE}
+library(indicoio)
+```
+
+```{r, Libraries, eval=TRUE, warning=FALSE, message=FALSE}
+library(DT)
+library(ggplot2)
+library(httr)
+library(jsonlite)
+library(knitr)
+library(leaflet)
+library(plotly)
+library(plyr)
+library(dplyr)
+library(RColorBrewer)
+library(RCurl)
+library(rmarkdown)
+library(ROAuth)
+library(stringr)
+library(tidyr)
+library(twitteR)
+library(XML)
+library(scales)
+
+```
+
+# Sources
+
+## Part 1. Twitter Search Setup
+
+We registered for a Twitter API key to perform the search of public tweets related to movies. 
+
+This code chunk (`Twitter Setup`) was run first as it requires a PIN given by Twitter.  
+
+```{r, Twitter Setup, eval=FALSE}
+library(twitteR)
+library(httr)
+library(ROAuth)
+
+consumer_key <- "consumer_key"
+consumer_secret <- "consumer_secret"
+access_token <- "access_token"
+access_secret <- "access_secret"
+
+download.file(url='http://curl.haxx.se/ca/cacert.pem', destfile='cacert.pem')
+reqURL <- 'https://api.twitter.com/oauth/request_token'
+accessURL <- 'https://api.twitter.com/oauth/access_token'
+authURL <- 'https://api.twitter.com/oauth/authorize'
+Cred <- OAuthFactory$new(consumerKey=consumer_key,
+                         consumerSecret=consumer_secret,
+                         requestURL=reqURL,
+                         accessURL=accessURL,
+                         authURL=authURL)
+
+Cred$handshake(cainfo = system.file('CurlSSL', 
+                                    'cacert.pem', 
+                                    package = 'RCurl'))
+```
+
+We then ran the following chunks after entering the PIN for Twitter Authorization.
+
+```{r, eval=FALSE}
+save(Cred, file='twitter authentication.Rdata')
+load('twitter authentication.Rdata') 
+setup_twitter_oauth(consumer_key, 
+                    consumer_secret, 
+                    access_token, 
+                    access_secret)
+```
+
+
+## Part 2. NYT Movie Review API
+
+We registered for a New York Times Movie API key to pull the movie review data.
+
+We used the opening date range 2016-04-21 through 2016-05-07.
+
+```{r, eval=TRUE, include=FALSE}
+YOURAPIKEYHERE<- "ef056a1d0cdde8b2f03c95bc7dd57722:19:29126896"
+```
+
+```{r, eval=FALSE}
+#required libraries
+library(jsonlite)
+library(knitr)
+
+#RESULTS 0-20 AS OF 2016-05-07
+NYTREVIEWS_JSON_URL1 = paste0('http://api.nytimes.com/svc/movies/v2/reviews/search.json?opening-date=2016-04-21;2016-05-07&api-key=',YOURAPIKEYHERE, '&order=by-title', collapse = "")#url for api results 0-20
+json_file1 <- fromJSON(URLencode(NYTREVIEWS_JSON_URL1))# get json
+df1 <- as.data.frame(json_file1$results) #dataframe for results
+#str(df1) #view structure 
+#colnames(df1) #view column names
+df1s<-df1[,c(1:8)] #subset needed columns
+#kable(df1s) #test
+
+
+#RESULTS 21-40 AS OF 2016-05-07
+NYTREVIEWS_JSON_URL2 = paste0('http://api.nytimes.com/svc/movies/v2/reviews/search.json?opening-date=2016-04-21;2016-05-07&api-key=', YOURAPIKEYHERE, '&offset=20&order=by-title', collapse = "") #url for api results 20-40
+json_file2 <- fromJSON(NYTREVIEWS_JSON_URL2) #get json
+df2 <- as.data.frame(json_file2$results) #dataframe for results
+df2s<-df2[,c(1:8)] #subset needed columns
+
+#kable(df2s) #test
+
+#test
+#NYTREVIEWS_JSON_URL3 = 'http://api.nytimes.com/svc/movies/v2/reviews/search.json?opening-date=2016-04-21;2016-05-07&api-key=YOURAPIKEYHERE&offset=40'
+#json_file3 <- fromJSON(NYTREVIEWS_JSON_URL3) #get json
+#df3 <- as.data.frame(json_file3$results) #dataframe for results
+#df3s<-df3[,c(1:8)] #subset needed columns
+#kable(df3s)
+
+#ALL RESULTS 0-40 COMBINED
+df<- rbind(df1s,df2s) #combine all results
+#knitr::kable(df, row.names =TRUE) #test
+
+#ADD URL COLUMN TO RESULTS
+url1 <- json_file1$results$link #collect links part 1
+url1<-url1[,c(1:2)] #subset links
+url2 <- json_file2$results$link #collect links part 2
+url2<-url2[,c(1:2)] #subset links
+#str(url1) #test
+urls<- rbind(url1,url2) #combine all results for links
+#knitr::kable(urls, row.names = TRUE) #test
+combo<-cbind(df,urls) #combine reviews and links
+combo<-combo[,c(1:3,7,8,10)] #subset needed columns
+combo<-combo[,c(1,5,4,6,2,3)] #reorder needed columns
+kable(combo, row.names = TRUE) #display with row numbers
+write.table(combo, "nytmovies.csv") #export to CSV
+```
+
+The resulting CSV is available here:
+
+<a href="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/nytmovies.csv">List of New York Times Movie Reviews With URLs</a>
+
+## Part 3. NYT Sentiment Analysis
+
+For each URL pointing to a movie review, we then scraped the text of the review. Only the actual text of the review was considered. This was indicated by the class = 'story-body-text story-content' under the paragraph tag "< p >". In addition, we retrieved the genre of the movie listed in the individual review.  The genres are indicated by the following tag <span itemprop='genre' class='genre>. For movies categorized as more than one genre, we retrieved only the first genre tag. 
+
+We then ran the review text through sentiment analysis with indico, resulting in a 0-1 score, with 1 being most positive.
+
+For reproducibility of results, we read the review list and URLs from Github.
+
+```{r, eval = FALSE}
+# Retrieve list of movie from Github
+movie_list_url <- getURL("https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/nytmovies2.csv")
+movie_list <- read.csv(textConnection(movie_list_url), header = TRUE, sep = ",")
+
+movie_list[1:5,]
+str(movie_list)
+
+
+# initialize resulting data frame
+movie_score_nyt <- data.frame()
+
+# initialize variables:
+
+# INDICO API Key 
+my_indicoio_API_Key <-"2cf9508e4628b67c9b69ae7d1059efda"
+
+# Set Up xpath to retrieve review and genre
+xpath_review <- "//p[@class = 'story-body-text story-content']"
+xpath_genre <- "(//span[@itemprop='genre'][@class = 'genre'])[1]" # will only retrieve first one
+
+agent <- c(R.version$version.string, ",", R.version$platform)
+
+# Loop through movie list, retrieve review for each movie review url
+loop_counter <- nrow(movie_list)
+
+for (i in 1:loop_counter){
+  
+  #Set RCurl pars
+  curl <- getCurlHandle()
+  curlSetOpt(cookiejar="cookies.txt",  useragent = agent, followlocation = TRUE, curl=curl)
+  
+  movie_url <-  movie_list$url[i]
+  
+  # Get Review corresponding the url
+  my_movie <- getURL(as.character(movie_url), curl = curl, verbose = FALSE)
+  
+  content_review = htmlTreeParse(my_movie, asText=TRUE, useInternalNodes = TRUE, encoding = 'UTF-8')
+  
+  plain_text <- xpathSApply(xmlRoot(content_review), xpath_review, xmlValue)
+  review_df <- as.data.frame(as.character(paste(plain_text, collapse = " ")))
+  
+  colnames(review_df) <- "review"
+  review_df$movie <- movie_list$movie[i]
+  
+  review_df$Sentiment_Score_nyt <- unlist(sentiment(as.character(review_df$review), api_key = my_indicoio_API_Key))
+  
+  genre <- xpathSApply(xmlRoot(content_review), xpath_genre, xmlValue)
+  review_df$genre <-genre
+  
+  movie_score <- rbind(movie_score, review_df)
+}
+
+movie_score_nyt <- inner_join(movie_list, movie_score, by = "movie")
+
+
+write.csv(movie_score_nyt, file = "movie_df.csv", sep = ",")
+
+```
+
+The resulting CSV is available here:
+
+<a href="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/movie_score_nyt.csv">NYT Movie Reviews With Full Text and Sentiment Score</a>
+
+
+
+## Part 4. Twitter Sentiment Analysis
+
+Once we established the list of available New York Times movie reviews, we ran the Twitter search using the movie title as a search term. To get better Twitter search results for one-word movies, we added the word "movie" to our search term.
+
+This chunk retrieved the Twitter search results for a term. `searchTwitter` has some other settings that could probably improve results.
+
+We used the indico package to perform sentiment analysis, resulting in a score of 0-1 for each tweet, 1 being extremely positive.
+
+We decided to use unique tweets only, therefore eliminating any retweet data.
+
+For the benefit of our analysis, we filtered the Twitter search results to pull only the tweets which were coded with geographical location.
+
+We chose the following cities at random and pulled tweets for only these cities. 
+
+```{r, eval=TRUE}
+#'r paste(str_trim(locations$City), collapse = ", ")`.
+library(knitr)
+library(RCurl)
+citiesurl <- getURL("https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/locations.csv")
+
+citiesxy<- data.frame(read.csv(text=citiesurl))
+
+kable(citiesxy)
+```
+
+We mapped these cities with Leaflet.
+
+
+```{r, include= FALSE, eval=TRUE}
+url <- "https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/"
+```
+
+```{r, eval= TRUE}
+data.url <- file(paste(url,"locations.csv", sep = ""), open="r" )
+locations <- read.csv(data.url, sep=",", header=TRUE, stringsAsFactors = FALSE)
+close(data.url)
+```
+
+
+```{r, eval=TRUE}
+library(leaflet)
+leaflet(locations) %>% 
+  addProviderTiles("Stamen.Toner") %>% 
+  addMarkers(lng = ~Long, lat = ~Lat, popup = paste(as.character(str_trim(locations$City))))
+```
+<br>
+Using the full list of reviews, we cleaned up character and encoding issues to be able to search Twitter by movie name. 
+
+```{r, Using Movies CSVs, include = FALSE, eval=true, warning=FALSE}
+
+movie_titles_1 <- read.csv(file(paste(url,"20160508nytreviews.csv", sep = ""), open="r" ), sep=" ", header=TRUE, stringsAsFactors = FALSE)
+
+movie_titles_2 <- read.csv(file(paste(url,"20160501nytreviews.csv", sep = ""), open="r" ), sep=" ", header=TRUE, stringsAsFactors = FALSE)
+
+movies <- as.data.frame(unique(
+  c(enc2utf8(gsub("??????T", "'",as.character(movie_titles_1$display_title))),
+                                          enc2utf8(gsub("??????T", "'",as.character(movie_titles_2$display_title))))))
+colnames(movies) <- "display_titles"
+
+```
+
+We retrieved tweets based on our date range and geographical locations, then used Indico to generate a sentiment score for each individual tweet.
+
+```{r, Searching Twitter, eval= FALSE}
+library(indicoio)
+
+rm_special <-function(x) iconv(x, "UTF-8", "UTF-8",sub='')
+
+search_term <- function(term){
+                  require(magrittr)
+                  search_term <- gsub(" ", "+", term) %>%
+                                 paste("+movie", sep = "")
+                  return(search_term)
+                }
+
+
+df <- NULL
+for (i in movies$display_titles){
+  SearchTerm <- search_term(i)
+  for (j in seq(1:length(locations$City))){
+      list <- suppressWarnings(searchTwitter(SearchTerm,  
+                                             since = format(Sys.Date()-1,format="%Y-%m-%d"), 
+                                             until = format(Sys.Date(),format="%Y-%m-%d"), n = 5000,
+                                             geocode = paste(locations$Lat[j], ",", locations$Long[j], ",30mi", sep = "" )
+                                             ))
+          if (length(list) == 0){ 
+            NULL
+          } else { 
+          tweetdf <- twListToDF(list)
+          tweetdf <- as.data.frame(unique(tweetdf$text))
+          colnames(tweetdf) <- c("tweet")
+          tweetdf$city <- locations$City[j]
+          tweetdf$movie <- as.character(i)
+          tweetdf$day <- format(Sys.Date() ,format="%m.%d.%Y")
+          df <- rbind(df,tweetdf)
+          }
+         } 
+       }
+
+df$Sentiment_Score <- unlist(sentiment(as.character(rm_special(df$tweet)),  api_key = indico_api_key))
+write.csv(df, file = paste("Tweets for ", as.character(format(Sys.Date(), format="%m.%d.%Y")), ".csv", sep = ""))
+```
+
+The resulting Twitter CSVs for individual days are available here: 
+
+<a href="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.03.2016.csv">Tweets for 20160503</a>
+
+<a href="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.04.2016.csv">Tweets for 20160504</a>
+
+<a href="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.05.2016.csv">Tweets for 20160505</a>
+
+<a href="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.06.2016.csv">Tweets for 20160506</a>
+
+<a href="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.07.2016.csv">Tweets for 20160507</a>
+
+<a href="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.08.2016.csv">Tweets for 20160508</a>
+
+<a href="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/Tweets%20for%2005.09.2016.csv">Tweets for 20160509</a>
+
+<a href="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/tweets503to509.csv">Complete Dataset of All Tweets With Sentiment Score</a>
+
+
+# Transformation and Analysis
+
+## New York Times
+
+### New York Times Sentiment Analysis Litmus Test  
+
+We performed a sentiment analysis litmus test for New York Times reviews. The Times does not provide "stars" to rate their movie reviews but favorable reviews will be tagged with a "Critics' Pick." As a test for the sentiment analysis accuracy, we analyzed the results as follows:  
+
+We considered a "good" score any score >= 0.75 and expected the movie to be tagged with "Critics's Pick" (value = 1).  
+
+We looked at Pick/Good (True Positive), Pick/Bad (False Negative), NotPick/Good (False Positive), NotPick/Bad (True Negative).
+
+```{r, eval = TRUE, warning=FALSE}
+url <- "https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/"
+data.url <- file(paste(url,"movie_score_nyt.csv", sep = ""), open="r" )
+movie_score_nyt <- read.csv(data.url, sep=",", header=TRUE, stringsAsFactors = FALSE)
+
+nyt_false_negative <- movie_score_nyt %>% filter(Sentiment_Score_nyt < 0.75 & critics_pick == 1) %>% 
+                    select(movie, mpaa_rating, genre, Sentiment_Score_nyt, critics_pick)
+
+nyt_false_positive <- movie_score_nyt %>% filter(Sentiment_Score_nyt >= 0.75 & critics_pick == 0) %>% 
+                     select(movie, mpaa_rating, genre, Sentiment_Score_nyt, critics_pick)
+ 
+nyt_true_negative <- movie_score_nyt %>% filter(Sentiment_Score_nyt < 0.75 & critics_pick == 0) %>% 
+                     select(movie, mpaa_rating, genre, Sentiment_Score_nyt, critics_pick)
+
+nyt_true_positive <- movie_score_nyt %>% filter(Sentiment_Score_nyt >= 0.75 & critics_pick == 1) %>% 
+                      select(movie, mpaa_rating, genre, Sentiment_Score_nyt, critics_pick)
+
+close(data.url)
+
+```
+
+Percentage of False Positive: `r scales::percent(nrow(nyt_false_positive)/nrow(movie_score_nyt))`    
+Percentage of False Negative: `r scales::percent(nrow(nyt_false_negative)/nrow(movie_score_nyt))`   
+Percentage of True Positive:  `r scales::percent(nrow(nyt_true_positive)/nrow(movie_score_nyt))`   
+Percentage of True Negative:  `r scales::percent(nrow(nyt_true_negative)/nrow(movie_score_nyt))`   
+
+The question when conducting sentiment analysis is how confident are we on the results.  Based on this quick analysis, we can see that the sentiment analysis score does not always matched with whether the movie was recommended.  
+
+We number of false negative are really indicators of how difficult it is to accurately measure the tonality and sentiment in a document.  There are two movies that fell into the category of false negative.  The movies were recommended by the NY Times critic however the sentiment analysis score was less than the threshold we considered.  Upon reading the reviews, for these movies "Viva" and "A Hologram for a King", it is understandable that the results of the Sentiment Analysis are as they are.  Both movies are dramas with elements of the review depicting difficult, dark, and negative terms.  
+
+The False positive results are more easily explained, the NY Times can give neutral to positive review without recommending the movies.  Also, score of 0.75 may be too low a limit to be expected to recommendation.  We will therefore consider score below .50 as negative, score between .50 and .80 as neutral and above .80 as positive.  
+
+We will rerun the analysis based on these new limits.  False negative will be scores < .50 but with recommendation, False positive will be scores >= 80 without recommendation, and False neutral will be scores within interval [50;80) with recommendation;  
+
+```{r, eval = TRUE}
+nyt_false_negative <- movie_score_nyt %>% filter(Sentiment_Score_nyt < 0.50 & critics_pick == 1) %>% 
+                    select(movie, mpaa_rating, genre, Sentiment_Score_nyt, critics_pick)
+
+nyt_false_positive <- movie_score_nyt %>% filter(Sentiment_Score_nyt >= 0.80 & critics_pick == 0) %>% 
+                     select(movie, mpaa_rating, genre, Sentiment_Score_nyt, critics_pick)
+ 
+nyt_true_negative <- movie_score_nyt %>% filter(Sentiment_Score_nyt < 0.50 & critics_pick == 0) %>% 
+                     select(movie, mpaa_rating, genre, Sentiment_Score_nyt, critics_pick)
+
+nyt_true_positive <- movie_score_nyt %>% filter(Sentiment_Score_nyt >= 0.80 & critics_pick == 1) %>% 
+                      select(movie, mpaa_rating, genre, Sentiment_Score_nyt, critics_pick)
+
+nyt_false_neutral <-  movie_score_nyt %>% filter(Sentiment_Score_nyt >= 0.50 & Sentiment_Score_nyt < 0.80 
+                                                                            & critics_pick == 1) %>% 
+                     select(movie, mpaa_rating, genre, Sentiment_Score_nyt, critics_pick)
+
+nyt_true_neutral <-  movie_score_nyt %>% filter(Sentiment_Score_nyt >= 0.50 & Sentiment_Score_nyt < 0.80 
+                                                                            & critics_pick == 0) %>% 
+                     select(movie, mpaa_rating, genre, Sentiment_Score_nyt, critics_pick)
+```
+
+Percentage of False Positive: `r scales::percent(nrow(nyt_false_positive)/nrow(movie_score_nyt))`    
+Percentage of False Negative: `r scales::percent(nrow(nyt_false_negative)/nrow(movie_score_nyt))`   
+Percentage of False Neutral : `r scales::percent(nrow(nyt_false_neutral)/nrow(movie_score_nyt))`   
+Percentage of True Positive : `r scales::percent(nrow(nyt_true_positive)/nrow(movie_score_nyt))`   
+Percentage of True Neutral  : `r scales::percent(nrow(nyt_true_neutral)/nrow(movie_score_nyt))`
+Percentage of True Negative : `r scales::percent(nrow(nyt_true_negative)/nrow(movie_score_nyt))`   
+
+
+### New York Times Sentiment Summary
+
+For the New York Times data, we created a sentiment score summary table without the full review text for easier analysis.
+
+```{r, eval= TRUE, warning= FALSE}
+url <- "https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/"
+
+data.url <- file(paste(url,"movie_score_nyt.csv", sep = ""), open="r" )
+reviewscore <- read.csv(data.url, sep=",", header=TRUE, stringsAsFactors = FALSE)
+
+reviewscore<-reviewscore[,c(2:5,7:8,10:11)] #subset needed columns
+#kable(reviewscore)
+close(data.url)
+```
+
+```{r, eval=TRUE, warning= FALSE, message=FALSE}
+nytsent<-getURL("https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/sentimentsummarynyt.csv")
+
+df<- data.frame(read.csv(text=nytsent))
+
+datanyt<-df[,c(3:4,7:9)]
+datanyt$Sentiment_Score_nyt=round(datanyt$Sentiment_Score_nyt,3) #round decimals to 3 places
+
+datatable(datanyt, options = list( pageLength = 5, lengthMenu = c(5, 10, 40)), rownames= TRUE)
+```
+
+
+```{r, eval= FALSE}
+write.csv(reviewscore, file = "sentimentsummarynyt.csv", sep = ",")
+```
+
+The resulting CSV is available here:
+
+<a href="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/sentimentsummarynyt.csv">NYT Sentiment Summary</a>
+
+
+## Twitter
+
+### Twitter Daily Breakdown
+
+We analyzed each day's worth of tweets separately to identify outliers and possible trends. The complete daily analysis is available here.
+
+<a href="http://rpubs.com/aapsps/179750">Analysis of Movie Tweets By Day</a>
+
+### Twitter Combined Data
+
+We combined all seven days of tweets into one dataframe of 5,445 records. This served as our primary Twitter dataset.
+
+### Twitter Sentiment Summary
+
+We looked at the average Twitter Sentiment by movie. 
+
+```{r, eval=TRUE, include=FALSE, warning=FALSE, message=FALSE}
+library(tidyr)
+library(plyr)
+library(dplyr)
+library(ggplot2)
+library(knitr)
+library(RCurl)
+```
+
+
+```{r, eval=TRUE}
+
+tweets1 <- getURL("https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/tweets503to509.csv")
+
+tweets1<- data.frame(read.csv(text=tweets1))
+
+```
+
+
+```{r, exceptions, eval = TRUE}
+tweets1$city[tweets1$city == 'los Angeles'] <- 'Los Angeles'
+tweets1$movie <- encodeString(as.character(tweets1$movie))
+tweets1$movie[tweets1$movie == 'Mother<U+0092>s Day'] <- "Mother's Day"
+tweets1$movie[tweets1$movie == "L<U+0092>Attesa (The Wait)"] <- "L'Attesa (The Wait)"
+```
+
+```{r, eval=TRUE, warning= FALSE}
+moviesum1<- ddply(tweets1, .(movie), summarize,  Sentiment_Score=mean(Sentiment_Score), Count_of_Tweets=length(tweet)) #summarize by movie
+
+moviesum1$movie<-as.character(moviesum1$movie) #convert levels to character
+moviesum1<- arrange(moviesum1, movie) #sort alphabetically by movie name
+#moviesum1$num<-seq.int(nrow(moviesum1)) # add counter row
+
+names(moviesum1)<-c("Movie","Sentiment_Score","Count_of_Tweets")
+```
+
+```{r, eval=TRUE, warning= FALSE, message=FALSE}
+twittersent<-getURL("https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/sentimentsummarytwitter.csv")
+
+df<- data.frame(read.csv(text=twittersent))
+
+datatw<-df[,c(2:4)]
+datatw$Sentiment_Score=round(datatw$Sentiment_Score,3) #round decimals to 3 places
+
+datatable(datatw, options = list(columnDefs = list(list(className = 'dt-center', targets = 3)), pageLength = 5, lengthMenu = c(5, 10, 40)), rownames= TRUE) #create data table for display
+
+datatable(datatw, options = list(pageLength = 5, lengthMenu = c(5, 10, 40)), rownames= TRUE)
+```
+
+
+```{r, eval= FALSE}
+write.csv(moviesum1, file = "sentimentsummarytwitter.csv", sep = ",")
+```
+
+The resulting CSV is available here:
+
+<a href="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/sentimentsummarytwitter.csv">Twitter Sentiment Summary</a>
+
+### Twitter City Score
+
+We looked at the average Twitter sentiment by city.
+
+```{r, eval=TRUE}
+citysum1<- ddply(tweets1, .(city), summarize,  Sentiment_Score=mean(Sentiment_Score), Count_of_Tweets=length(tweet)) #summarize by city
+kable(citysum1, rownames = TRUE)
+```
+
+
+```{r, eval=FALSE, include=FALSE}
+## Movie and City Score
+moviecitysum1<- ddply(tweets1, .(movie, city), summarize,  Sentiment_Score=mean(Sentiment_Score)) #summarize by movie and city
+kable(moviecitysum1)
+```
+
+## Comparison
+
+```{r, eval= TRUE, warning= FALSE}
+datanyt<- datanyt %>% left_join(datatw, by = "movie") 
+
+datacombo<- datanyt[,c(1,4,6,3,7,2,5)]
+
+names(datacombo)<-c("Movie","NYT_Sentiment","Twitter_Sentiment","NYT_CriticsPick","Count_of_Tweets","Opening_Date","Genre")
+
+#kable(datacombo)
+
+datatable(datacombo, options = list( pageLength = 40, lengthMenu = c(5, 10, 40)), rownames= TRUE)
+
+```
+
+```{r, eval= FALSE}
+write.csv(datacombo, file = "sentimentsummarycombo.csv", sep = ",")
+```
+
+The resulting CSV is available here:
+
+<a href="https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/sentimentsummarycombo.csv">Comparison Summary</a>
+
+
+# Visualization
+
+## NYT vs. Twitter
+
+We compared New York Times review sentiment score and Twitter average sentiment score for the top 10 movies by tweet count
+
+```{r, eval=TRUE, warning=FALSE, message=FALSE, height=800, width = 600}
+library(plotly)
+
+top_movies <- ddply(tweets1, ~movie, summarize, tweet_count = length(tweet))
+top_movies <- top_movies[order(-top_movies$tweet_count),]
+n <- 10
+top_movies <- head(top_movies$movie, n = n)
+data.url <- file(paste(url,"movie_score.csv", sep = ""), open="r" )
+movies_score_NYT <- read.csv(data.url, sep=",", header=TRUE, stringsAsFactors = FALSE)
+movies_score_NYT$movie[movies_score_NYT$X == 22] <- "Mother's Day"
+movies_score_NYT_subset <- subset(movies_score_NYT, movies_score_NYT$movie %in% top_movies)
+
+a <- list()
+for (i in seq_len(nrow(movies_score_NYT_subset ))) {
+  m <- movies_score_NYT_subset [i, ]
+  a[[i]] <- list(
+  x = movies_score_NYT_subset$movie[i],
+  y = movies_score_NYT_subset$Sentiment_score[i],
+  text = paste("NYT Score: <br>", signif(movies_score_NYT_subset$Sentiment_score[i],5)),
+  xref = "x", yref = "y", showarrow = TRUE,  arrowhead = 7,  ax = 10,  ay = -20
+  )
+}
+
+m = list( l = 50,  r = 50,  b = 150,  t = 100,  pad = 5)
+
+xlabel <- list(title = "Movie")
+ylabel <- list(title = "Setiment Score")
+
+tweets1_subset <- subset(tweets1, tweets1$movie %in% top_movies) %>%
+                  arrange(movie)
+
+plot_ly(tweets1_subset, 
+        y = Sentiment_Score, 
+        color = movie, 
+        type = "box", 
+        boxpoints = "all", jitter = 0.3) %>%
+  layout(title = sprintf("Box Plot of Movie Tweets for Top %s Movies", n),
+         xaxis = xlabel, 
+         yaxis = ylabel,
+         annotations = a,
+         autosize = F, width = 1000, height = 800, margin = m) 
+
+```
+
+<br><br><br><br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br>
+
+
+# Twitter Sentiment Score Confidence Interval
+
+The below graphs display the confidence intervals for each movie based on their twitter sentiment analysis scores. We can see that for 9 of the 10 movies the New York Times sentiment score falls outside of the range of confidence interval for each movie. Since we are 95% confident that the true mean of twitter sentiment is contained in this interval we can conclude that twitter sentiment scores are not similar to sentiment scores of the New York Times review. 
+
+```{r, fig.width=10, fig.height=6, fig.align = 'center'}
+
+tweets <- merge(tweets1, movies_score_NYT_subset[2:4]) %>%
+          rename(Twitter_score = Sentiment_Score, NYT_score = Sentiment_score) %>%
+          select(movie, Twitter_score, NYT_score)
+
+tweets_confidence <- NULL
+for (i in unique(tweets$movie)){
+  conf <- t.test(tweets$Twitter_score[tweets$movie == i], conf.level = .95)
+  results <- NULL
+  results$movie <- i
+  results$lower_conf <- conf$conf.int[1] 
+  results$upper_conf <- conf$conf.int[2]
+  tweets_confidence <- rbind(tweets_confidence, as.data.frame(results))
+}
+
+tweets <- merge(tweets, tweets_confidence)
+
+ggplot(tweets, aes(x=Twitter_score)) + 
+      geom_histogram(binwidth=.1, colour="black", fill="white") + 
+      theme_minimal() + 
+      theme(legend.position="top") + 
+      facet_wrap(~movie) + 
+      xlab("Twitter Sentiment Score") +
+      ylab("Count") +
+      ggtitle("Confidence Intervals for Top 10 Twitter Movies and NYTimes Sentiment Score") + 
+      geom_vline(data=unique(tweets[c("movie","NYT_score")]), 
+                 aes(xintercept = NYT_score, color="NYT Sentiment Score"), linetype= 1, size=1) + 
+      geom_vline(data = tweets[c("movie", "lower_conf")], 
+                 aes(xintercept = lower_conf , color = "Lower Confidence Interval"), linetype="dashed", size=1) + 
+      geom_vline(data = tweets[c("movie", "upper_conf")], 
+                 aes(xintercept = upper_conf , color = "Upper Confidence Interval"), linetype="dashed", size=1) + 
+      scale_colour_manual(name="", values=c("NYT Sentiment Score" ="salmon", 
+                                                      "Lower Confidence Interval" = "darkolivegreen2",
+                                                      "Upper Confidence Interval" = "lightskyblue3")) 
+```
+
+## Twitter Scores
+
+We looked at average Twitter sentiment score by movie and by city.
+
+```{r, eval=TRUE}
+
+ggplot(
+  moviesum1, aes(x = reorder(Movie,Sentiment_Score), y = Sentiment_Score, fill=Sentiment_Score)) + 
+  geom_bar(stat="identity") +
+  ggtitle("Average Sentiment Score from Twitter, by Movie")+ 
+  theme(axis.text=element_text(angle=90))+
+  labs(x="Movies",y="Score")
+
+ggplot(
+  citysum1, aes(x = reorder(city,Sentiment_Score), y = Sentiment_Score, fill=Sentiment_Score)) + 
+  geom_bar(stat="identity") +
+  ggtitle("Average Sentiment Score from Twitter, by City")+ 
+  theme(axis.text=element_text(angle=90))+
+  labs(x="City",y="Score")
+```
+
+We looked at average Twitter sentiment score by movie for the top 10 movies. Larger circles indicate more positive sentiment. Different colors indicate different movies.
+
+```{r}
+library(RColorBrewer)
+
+mapped_tweets <- merge(tweets1, locations, all.x = TRUE, by.y = "City", by.x = "city")  %>%
+                group_by(movie, city, Long, Lat) %>%
+                summarise(avg_twitter_score = mean(Sentiment_Score)) %>%
+                merge(movies_score_NYT[,c("movie", "Sentiment_score")], all.x = TRUE, by = "movie") %>%
+                rename(NYT_sentiment_score = Sentiment_score)
+
+
+mapped_tweets_top <- subset(mapped_tweets, mapped_tweets$movie %in% top_movies)
+
+factpal <- colorFactor(brewer.pal(10, "Spectral"), mapped_tweets_top$movie)
+
+leaflet(mapped_tweets_top) %>% 
+  addProviderTiles("Stamen.Toner") %>%
+  addCircles(lng = ~jitter(Long, factor = 20), lat = ~jitter(Lat, factor = 20), weight = 2,
+    radius = ~avg_twitter_score*100000, 
+    popup =paste("<font color=", factpal(mapped_tweets_top$movie), ">" , 
+                 "Movie:", as.character(mapped_tweets_top$movie), "<br>", 
+                 "Avg Twitter Sentiment Score:", as.character(signif(mapped_tweets_top$avg_twitter_score,3)),"<br>", 
+                 "NYT Sentiment Score:", as.character(signif(mapped_tweets_top$NYT_sentiment_score,3)), 
+                 "</font>"),
+    color = ~factpal(mapped_tweets_top$movie),
+    fillOpacity = 0.4)
+```
+
+<br>
+<br>
+---
+## Statistical Analysis  
+
+One of the question that we would like answer is how relevant is the NY Times review as a predictor of the Sentiment Analysis for the tweets.  In order to attempt to answer this question will will compare the NY Times score against the averate of the sentiments analysis for each movie.
+
+### Data Set  
+
+For this analysis, we will consider the average of the sentiment analysis for tweets and the NY Times sentiment analsyis.  However, we will filter it to consider only movies for which we have at least 15 tweets.  
+
+```{r, eval = TRUE}
+####################################################################
+# Build Data Set for Analysis
+####################################################################
+
+# Merge the 2 streams
+
+tweets_url <- getURL("https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/tweets503to509.csv")
+tweets_list <- read.csv(text = tweets_url, header = TRUE, sep = ",")
+
+#movie_score_nyt <- read.csv("movie_score_nyt.csv", header = TRUE, sep = ",")
+
+nyt_url <- getURL("https://raw.githubusercontent.com/spsstudent15/Data607FinalProject/master/sentimentsummarynyt.csv")
+movie_score_nyt <- read.csv(text = nyt_url, header = TRUE, sep = ",")
+
+str(movie_score_nyt)
+str(tweets_list)
+
+my_data_raw <- inner_join(tweets_list, movie_score_nyt, by = "movie")
+
+###################################################################
+# Transform data
+###################################################################
+# Fix Los Angeles
+
+my_data_raw$city[my_data_raw$city == 'los Angeles'] <- 'Los Angeles'
+
+###################################################################
+# Select/Filter/Arrange Data
+
+### Selecting columns
+
+my_data_analysis <- select (my_data_raw, movie, day, opening_date, publication_date, 
+                            mpaa_rating, genre, critics_pick, city, Sentiment_Score, Sentiment_Score_nyt)
+
+
+#### Filter out any rows where count < 15
+
+data_movie <- my_data_analysis %>% group_by (movie) %>% summarise (count=n())
+
+data_movie_15 <- data_movie %>% filter(count>= 15) %>% select(movie, count)
+data_movie_15 <- arrange(data_movie_15, desc(count), movie)
+
+mydf15 <- inner_join(data_movie_15, my_data_analysis)
+
+mydf15 <- arrange(mydf15, desc(count), movie, Sentiment_Score)
+
+###################################################################
+# Tweet Sentiment Analysis Confidence Interval
+##################################################################
+movies <- unique(mydf15$movie)
+n_movie <- length(movies)
+
+# initial storage variables
+movie_mean <- rep(NA, n_movie)
+
+movie_cis <- matrix(nrow = n_movie,ncol = 2)
+
+for (i in 1:n_movie){
+  
+  # Extract Data for caluclation
+  rows <- which(mydf15$movie == movies[i])
+  
+  observations <- mydf15$Sentiment_Score[rows]
+  
+  # Store mean for Sentiment Analysis
+  movie_mean[i] <- mean(observations)
+  
+  movie_sd <- sd(observations)
+  n <- length(observations)
+  
+  movie_ster <- movie_sd / sqrt(n)
+  
+  # Calculate CIs
+  # We will use 2 (instead of 1.96 for 95% interval since we do not know distribution)
+  
+  movie_cis[i,1] <- movie_mean[i] - 2 * movie_ster
+  movie_cis[i,2] <- movie_mean[i] + 2 * movie_ster
+}
+
+movie_mean_df <- bind_cols(data_movie_15,as.data.frame(movie_mean))
+
+movie_analysis <- inner_join(movie_mean_df, movie_score_nyt)
+movie_analysis <- select(movie_analysis, movie, count, movie_mean, mpaa_rating, critics_pick, Sentiment_Score_nyt, genre)
+movie_analysis <- arrange(movie_analysis, desc(count), movie)
+
+#############################################################
+
+
+```
+
+### Statistical Analysis
+
+We will consider the NY Times Review Score and the average Sentiment Analyis score of the tweets for a given movie.  both these variables are numerical in nature.  we will first plot them.  
+
+
+```{r, eval = TRUE}
+ggplot(movie_analysis, aes(x=Sentiment_Score_nyt, y=movie_mean )) + geom_point()
+```
+
+From the scatter plot, it is does not seem probable that there is relation between these two variables.  We will now fit a line through the graph and calculate the linear regression.
+
+```{r, eval = TRUE}
+ggplot(movie_analysis, aes(x=Sentiment_Score_nyt, y=movie_mean )) + geom_point() + stat_smooth(method = lm)
+m1 <- lm(movie_mean ~ Sentiment_Score_nyt, data = movie_analysis)
+
+summary(m1)
+
+```
+
+Frome these results, it does not appear that there is relation between the two variables.  
+
+To have a better picture of the variations between the average of the tweets sentiment analysis and the NY Times review score will plot the confidence interval (95%) for the tweets for each movie concurrently and compare.  We will also place on the graph the NY Times review score. 
+
+```{r, eval = TRUE}
+# Building Confidence Interval Grapth in ggplot layer by layer
+# base plot; each point is a tweet, graded for transparency (alpha setting)
+p <- ggplot(mydf15, aes(x=reorder(movie, -count), y=jitter(Sentiment_Score, .4))) + geom_point(colour = "darkgrey", size = 3, alpha=.1)
+
+# Added segment for Confidence Interval
+p <- p + annotate("segment", x = movies, xend=movies, y=movie_cis[,1], yend = movie_cis[,2], colour = "blue", size = 2)
+
+# Added mean for tweets and NYT score (color coded for critics_pick)
+p <- p + geom_point(data=movie_mean_df, mapping=aes(y=movie_mean, colour = "red",  size = 4))
+p <- p + geom_point(data=mydf15, mapping=aes( y=Sentiment_Score_nyt, colour = as.factor(critics_pick), size = 4))
+
+# change text for axis labels
+p <- p + xlab("Movies") + ylab("Tweets Sentiment Analysis Score")
+
+# change apperance of text for axis label
+p <- p + theme (axis.title.x = element_text(face="italic", colour = "darkblue", size = 14), axis.title.y = element_text(face="italic", colour = "darkblue", size = 14))
+
+# change appearance of text for x-axis tick text
+p <- p + theme (axis.text.x = element_text(size = 10, angle = 45, hjust = 1, vjust = 1))
+
+# Added title for graph and add text formatting with theme element
+p <- p + ggtitle("Tweets Sentiment Analysis Confidence Intervals") + theme(plot.title = element_text(vjust = 3, colour = "darkblue", face = "bold",  size = 14))
+
+# Format Legends
+# Remove Legends for size
+p <- p + guides(size = FALSE)
+
+# Format Legend box for Points
+p <- p + labs(colour = "Points") + guides(colour = guide_legend (reverse = TRUE)) + scale_colour_discrete(labels=c("NYT score not picked", "NYT Score picked", "mean(Tweet Scores)"))
+
+p
+
+```
+
+The movie are sorted by number of overall tweets in descending order.  
+
+From this graph, we have only one movie for whom the NY Times score falls into the confidence interval around the average of the tweets: "Viva", we will recall that this is the movie that is a NY Critics' Pick that had a poor result on the sentiment analysis of the review.  
+
+We can conclude that there is no correlation between the NY Times review and the average sentiment analysis about a given movie.  
+
+---
+<br>
+<br>
+
+# New Features
+
+## Twitter API / OAUTH
+
+We utilized the Twitter API to develop our collection of tweets. Using the `twitteR` package we were able to pull tweets for locations by setting the geocode location and radius. OAuth was necessary because the `twitteR` uses the Developer API to search tweets based on our settings, it also required interaction by allowing the application access by putting in a key given by Twitter. 
+
+## Sentiment analysis machines
+
+We tested a number of different sentiment analysis machines.
+
+We started out trying to using the bag of words method to count positive and negative words within the tweet to get the positivity score. The problem with this method was that many of the words we had did not show up in tweets and the context of the tweet was typically misclassified. 
+
+We realized that we needed to get some help to get a more accurate sentiment analysis. We looked into several APIs such as IBM's [AlchemyAPI](http://www.alchemyapi.com/api/sentiment-analysis). We ended up using Indico since it offered a free tier and they had developed an easy to use `R` package. 
+
+## Indico package
+
+We used the Indico Sentiment Analysis API to analyze our text to return the positity on a scale from 0-1. We tested out several obviously bad and positive tweets and the response was very accurate. 
+
+ > Indico Benchmark: The API performs with 93% accuracy on the IMDB dataset (state of the art).
+
+## Leaflet package
+
+The Leaflet package was simple to use with our given list of locations with latitude and longitude. One drawback is the lack of a built-in zoom reset button. The popup option is a clean way to allow for label display without clutter.
+
+## Collaborating on Slack
+
+We found Slack easy to use with a pleasant user interface and file sharing options. Slack may be more useful for larger groups. For our three-person group, we found that email was mostly manageable. Since we were already checking in on email, RPubs, and Github, Slack seemed like one more thing to check.
+
+## Collaborating on Github 
+
+This was our first experience contributing to a repository using GitHub. It made sharing the code and version control of each change much easier than previous attempts. Github versioning control is powerful and can handle most merge seamlessly.  However if there is a conflic that Github cannot handle, the resolution must be handle through git command line and can be challenging.  
+
+# Challenges
+
+**Movie titles with common words**
+
+We encountered some issues with movies having one word titles that pulled lots of unrelated tweets. Our solution was to append `movies` to the search to try to narrow down results to just movies. One other issue is that a movie `Mother's Day` came out right before the actual Mother's Day holiday. Many people appeared to go to the movies on Mother's Day to celebrate but the actual movie they went to see may have been another one of the films. There are many nuances involved in pulling the tweets. 
+
+**Special characters and encoding**
+
+Movies with accents, such as foreign movies, and movies with apostrophes in the titles caused encoding issues which had to be resolved with character substitution. Several movies would have been unintentionally omitted from the analysis if we had not resolved these characters.
+
+**Twitter limitations**
+
+Twitter free service for directed search limits the number of tweets to the last 5000.  We had to revise our approach and coordinate the timing of the NY Times reviews with when we were pulling tweets to have any hope of having relevant data. 
+
+**Indico limitations**
+
+Indico's free service allows 10,000 pulls. Each tweet is counted as one pull. For a project with a contained scope, this may be feasible. However, for long-term research studies, a paid account would be needed.
+
+**New York Times API data**
+
+The syntax documentation for the NYT API was easy to follow. However, the pulls seemed to omit some results. The API gave 20 results per pull, so the use of offset=20, offset=40 was required to retrieve subsequent reqsults. Despite the offset function, it was necessary to combine two weeks of pulls and eliminate duplicate records to get the full dataset for our desired date range.
+
+# Insights and Conclusion
+
+**Twitter Data Reliability**
+
+Twitter has a limitation on interpretability, it is useful as a proof of concept but cannot be the sole source of information. Many tweets were commercial advertisements and had unhelpful links. Twitter is a useful tool to explore but I would not build a data product exclusively with it. Unless the search criteria can be narrowed to specific key words, we run the risk of pulling tweets that are not related to the indended search.  The nature of tweets (shorter messages) makes it difficult to filter unwanted results.
+
+**Comparing NYT and Twitter Scores**
+
+In our box plot comparison of the top 10 movies by tweet count, 6 of 10 movies had similar sentiment scores across our two data sources. 
+
+The Twitter data captured only 34 of our 40 New York Times reviewed movies. More obscure or independent movies, or movies with limited releases, were less likely to have mentions on Twitter. The New York Times does more in-depth cultural and artistic analysis than Twitter.
+
+**Outliers**
+
+**Interpretation of results**
+
