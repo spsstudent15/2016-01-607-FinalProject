@@ -610,9 +610,10 @@ The resulting CSV is available here:
 
 # Visualization
 
-## NYT vs. Twitter
 
-We compared New York Times review sentiment score and Twitter average sentiment score for the top 10 movies by tweet count
+## Comparison Box Plot
+
+We compared New York Times review sentiment score and Twitter average sentiment score for the top 10 movies by tweet count.
 
 ```{r, eval=TRUE, warning=FALSE, message=FALSE, height=800, width = 600}
 library(plotly)
@@ -662,9 +663,9 @@ plot_ly(tweets1_subset,
 <br><br><br><br><br><br><br><br>
 
 
-# Twitter Sentiment Score Confidence Interval
+## Confidence Interval
 
-The below graphs display the confidence intervals for each movie based on their twitter sentiment analysis scores. We can see that for 9 of the 10 movies the New York Times sentiment score falls outside of the range of confidence interval for each movie. Since we are 95% confident that the true mean of twitter sentiment is contained in this interval we can conclude that twitter sentiment scores are not similar to sentiment scores of the New York Times review. 
+We displayed the confidence intervals for each movie based on their twitter sentiment analysis scores. We can see that for 9 of the 10 movies the New York Times sentiment score falls outside of the range of confidence interval for each movie. Since we are 95% confident that the true mean of twitter sentiment is contained in this interval we can conclude that twitter sentiment scores are not similar to sentiment scores of the New York Times review. 
 
 ```{r, fig.width=10, fig.height=6, fig.align = 'center'}
 
@@ -703,66 +704,12 @@ ggplot(tweets, aes(x=Twitter_score)) +
                                                       "Upper Confidence Interval" = "lightskyblue3")) 
 ```
 
-## Twitter Scores
-
-We looked at average Twitter sentiment score by movie and by city.
-
-```{r, eval=TRUE}
-
-ggplot(
-  moviesum1, aes(x = reorder(Movie,Sentiment_Score), y = Sentiment_Score, fill=Sentiment_Score)) + 
-  geom_bar(stat="identity") +
-  ggtitle("Average Sentiment Score from Twitter, by Movie")+ 
-  theme(axis.text=element_text(angle=90))+
-  labs(x="Movies",y="Score")
-
-ggplot(
-  citysum1, aes(x = reorder(city,Sentiment_Score), y = Sentiment_Score, fill=Sentiment_Score)) + 
-  geom_bar(stat="identity") +
-  ggtitle("Average Sentiment Score from Twitter, by City")+ 
-  theme(axis.text=element_text(angle=90))+
-  labs(x="City",y="Score")
-```
-
-We looked at average Twitter sentiment score by movie for the top 10 movies. Larger circles indicate more positive sentiment. Different colors indicate different movies.
-
-```{r}
-library(RColorBrewer)
-
-mapped_tweets <- merge(tweets1, locations, all.x = TRUE, by.y = "City", by.x = "city")  %>%
-                group_by(movie, city, Long, Lat) %>%
-                summarise(avg_twitter_score = mean(Sentiment_Score)) %>%
-                merge(movies_score_NYT[,c("movie", "Sentiment_score")], all.x = TRUE, by = "movie") %>%
-                rename(NYT_sentiment_score = Sentiment_score)
-
-
-mapped_tweets_top <- subset(mapped_tweets, mapped_tweets$movie %in% top_movies)
-
-factpal <- colorFactor(brewer.pal(10, "Spectral"), mapped_tweets_top$movie)
-
-leaflet(mapped_tweets_top) %>% 
-  addProviderTiles("Stamen.Toner") %>%
-  addCircles(lng = ~jitter(Long, factor = 20), lat = ~jitter(Lat, factor = 20), weight = 2,
-    radius = ~avg_twitter_score*100000, 
-    popup =paste("<font color=", factpal(mapped_tweets_top$movie), ">" , 
-                 "Movie:", as.character(mapped_tweets_top$movie), "<br>", 
-                 "Avg Twitter Sentiment Score:", as.character(signif(mapped_tweets_top$avg_twitter_score,3)),"<br>", 
-                 "NYT Sentiment Score:", as.character(signif(mapped_tweets_top$NYT_sentiment_score,3)), 
-                 "</font>"),
-    color = ~factpal(mapped_tweets_top$movie),
-    fillOpacity = 0.4)
-```
-
 <br>
 <br>
----
+
 ## Statistical Analysis  
 
-One of the question that we would like answer is how relevant is the NY Times review as a predictor of the Sentiment Analysis for the tweets.  In order to attempt to answer this question will will compare the NY Times score against the averate of the sentiments analysis for each movie.
-
-### Data Set  
-
-For this analysis, we will consider the average of the sentiment analysis for tweets and the NY Times sentiment analsyis.  However, we will filter it to consider only movies for which we have at least 15 tweets.  
+We wanted to answer how relevant the New York Times review was a predictor of the sentiment analysis for the tweets.  In order to attempt to answer this question we compared the New York Times score against the average of the Twitter sentiment analysis for each movie. We filtered the dataset to consider only movies which generated at least 15 tweets.  
 
 ```{r, eval = TRUE}
 ####################################################################
@@ -852,19 +799,17 @@ movie_analysis <- arrange(movie_analysis, desc(count), movie)
 
 #############################################################
 
-
 ```
 
-### Statistical Analysis
+## Scatter Plot
 
-We will consider the NY Times Review Score and the average Sentiment Analyis score of the tweets for a given movie.  both these variables are numerical in nature.  we will first plot them.  
-
+We plotted the New York Times Review Score versus the average Twitter sentiment score.
 
 ```{r, eval = TRUE}
 ggplot(movie_analysis, aes(x=Sentiment_Score_nyt, y=movie_mean )) + geom_point()
 ```
 
-From the scatter plot, it is does not seem probable that there is relation between these two variables.  We will now fit a line through the graph and calculate the linear regression.
+From the scatter plot, it did not seem probable that there was a relationship between these two variables. We then fit a line through the graph and calculated the linear regression.
 
 ```{r, eval = TRUE}
 ggplot(movie_analysis, aes(x=Sentiment_Score_nyt, y=movie_mean )) + geom_point() + stat_smooth(method = lm)
@@ -874,9 +819,9 @@ summary(m1)
 
 ```
 
-Frome these results, it does not appear that there is relation between the two variables.  
+Frome these results, it did not appear that there was a relationship between these two variables.
 
-To have a better picture of the variations between the average of the tweets sentiment analysis and the NY Times review score will plot the confidence interval (95%) for the tweets for each movie concurrently and compare.  We will also place on the graph the NY Times review score. 
+To get a better picture of the variations between the average of the Twitter sentiment analysis and the New York Times review score, we plotted the confidence interval (95%) for the tweets for all movies concurrently. We also plotted the NY Times review score.
 
 ```{r, eval = TRUE}
 # Building Confidence Interval Grapth in ggplot layer by layer
@@ -913,15 +858,63 @@ p
 
 ```
 
-The movie are sorted by number of overall tweets in descending order.  
+We sorted the movies by number of overall tweets in descending order.  
 
-From this graph, we have only one movie for whom the NY Times score falls into the confidence interval around the average of the tweets: "Viva", we will recall that this is the movie that is a NY Critics' Pick that had a poor result on the sentiment analysis of the review.  
+From this graph, we had only one movie where the New York Times score fell into the confidence interval around the average of the tweets: "Viva", we recalled that this was a New York Times Critics' Pick that had a low score on the sentiment analysis of the review.
 
-We can conclude that there is no correlation between the NY Times review and the average sentiment analysis about a given movie.  
+We conclucded that there is no correlation between the New York Times review and the average sentiment analysis about a given movie.  
 
----
-<br>
-<br>
+
+## Twitter Scores
+
+We looked at average Twitter sentiment score by movie and by city.
+
+```{r, eval=TRUE}
+
+ggplot(
+  moviesum1, aes(x = reorder(Movie,Sentiment_Score), y = Sentiment_Score, fill=Sentiment_Score)) + 
+  geom_bar(stat="identity") +
+  ggtitle("Average Sentiment Score from Twitter, by Movie")+ 
+  theme(axis.text=element_text(angle=90))+
+  labs(x="Movies",y="Score")
+
+ggplot(
+  citysum1, aes(x = reorder(city,Sentiment_Score), y = Sentiment_Score, fill=Sentiment_Score)) + 
+  geom_bar(stat="identity") +
+  ggtitle("Average Sentiment Score from Twitter, by City")+ 
+  theme(axis.text=element_text(angle=90))+
+  labs(x="City",y="Score")
+```
+
+We looked at average Twitter sentiment score by movie for the top 10 movies. Larger circles indicate more positive sentiment. Different colors indicate different movies.
+
+```{r}
+library(RColorBrewer)
+
+mapped_tweets <- merge(tweets1, locations, all.x = TRUE, by.y = "City", by.x = "city")  %>%
+                group_by(movie, city, Long, Lat) %>%
+                summarise(avg_twitter_score = mean(Sentiment_Score)) %>%
+                merge(movies_score_NYT[,c("movie", "Sentiment_score")], all.x = TRUE, by = "movie") %>%
+                rename(NYT_sentiment_score = Sentiment_score)
+
+
+mapped_tweets_top <- subset(mapped_tweets, mapped_tweets$movie %in% top_movies)
+
+factpal <- colorFactor(brewer.pal(10, "Spectral"), mapped_tweets_top$movie)
+
+leaflet(mapped_tweets_top) %>% 
+  addProviderTiles("Stamen.Toner") %>%
+  addCircles(lng = ~jitter(Long, factor = 20), lat = ~jitter(Lat, factor = 20), weight = 2,
+    radius = ~avg_twitter_score*100000, 
+    popup =paste("<font color=", factpal(mapped_tweets_top$movie), ">" , 
+                 "Movie:", as.character(mapped_tweets_top$movie), "<br>", 
+                 "Avg Twitter Sentiment Score:", as.character(signif(mapped_tweets_top$avg_twitter_score,3)),"<br>", 
+                 "NYT Sentiment Score:", as.character(signif(mapped_tweets_top$NYT_sentiment_score,3)), 
+                 "</font>"),
+    color = ~factpal(mapped_tweets_top$movie),
+    fillOpacity = 0.4)
+```
+
 
 # New Features
 
